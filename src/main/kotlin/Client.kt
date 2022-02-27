@@ -1,11 +1,9 @@
-
 import kotlinx.browser.window
-import pixi.externals.extensions.addToBody
-import pixi.utils.Application
+import pixi.typings.app.Application
+
+lateinit var app: Application
 
 fun main() {
-	val app = Application {
-		resizeTo = window
-	}
-	app.addToBody()
+	window["game"] = Game
+	window.onload = { Game.emit("preInit") }
 }
