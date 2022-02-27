@@ -1,0 +1,12 @@
+# Intellij
+
+.idea
+
+# Gradle
+
+.gradle
+
+# Kotlin JS
+
+build
+kotlin-js-store
