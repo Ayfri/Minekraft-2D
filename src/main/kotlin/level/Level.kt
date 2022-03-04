@@ -4,12 +4,13 @@ import Game
 import blocks.Block
 import blocks.BlockState
 import math.Vec2I
-import math.toVec2I
-import pixi.typings.display.Container
+import pixi.typings.core.BaseTexture
+import pixi.typings.core.IAutoDetectOptions
+import pixi.typings.core.Resource
 import pixi.typings.interaction.interactive
-import pixi.typings.sprite.Sprite
+import tilemap.CompositeRectTileLayer
 
-class Level : Container() {
+class Level(tileset: Array<BaseTexture<Resource, IAutoDetectOptions>>) : CompositeRectTileLayer(tileset) {
 	val blockStates = MutableList(WIDTH * HEIGHT) { BlockState.AIR }
 	
 	init {
@@ -31,16 +32,17 @@ class Level : Container() {
 		val texture = Game.blockTextures[blockState.block.name] ?: return
 		val position = Vec2I(x, y) * Block.SIZE
 		
-		children.find { it.position.toVec2I() == position }?.let {
-			it.unsafeCast<Sprite>().texture = texture
-			it.renderable = blockState.block.visible
-		} ?: run {
-			Sprite(texture).also {
-				it.position.copyFrom(position.toPoint())
-				it.renderable = blockState.block.visible
-				addChild(it)
-			}
-		}
+//		children.find { it.position.toVec2I() == position }?.let {
+//			it.unsafeCast<Sprite>().texture = texture
+//			it.renderable = blockState.block.visible
+//		} ?: run {
+//			Sprite(texture).also {
+//				it.position.copyFrom(position.toPoint())
+//				it.renderable = blockState.block.visible
+//				addChild(it)
+//			}
+//		}
+		tile(texture, x * 16.0, y * 16.0)
 		blockState.emit("place", arrayOf(position))
 	}
 	

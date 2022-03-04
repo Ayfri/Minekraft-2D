@@ -16,6 +16,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.3")
     implementation("io.github.ayfri:PIXI-Kotlin:0.3.0")
+    implementation(npm("@pixi/tilemap", "3.2.1"))
 }
 
 kotlin {

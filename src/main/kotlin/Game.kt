@@ -9,22 +9,21 @@ import org.w3c.dom.events.Event
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
-import pixi.typings.core.ISystemConstructor
-import pixi.typings.core.Renderer
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
-import pixi.typings.event.EventSystem
 import pixi.typings.interaction.Button
 import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
 import pixi.typings.utils.EventEmitter
 import pixi.utils.Application
 import pixi.utils.MouseManager
+import tilemap.settings
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
 	val mouseManager = MouseManager()
 	lateinit var level: Level
+//	lateinit var tileMap: CompositeRectTileLayer
 	
 	init {
 		on("preInit") { preInit() }
@@ -33,12 +32,15 @@ object Game : EventEmitter() {
 	}
 	
 	fun preInit() {
+		settings.TEXTURES_PER_TILEMAP = 2048
+		
 		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
 		TextureManager.addPreLoadBlock("air")
 		TextureManager.loadTextures()
 		TextureManager.on("loaded") {
 			emit("init")
 		}
+//		tileMap = CompositeRectTileLayer((blockTextures.values.map { it.baseTexture }.toTypedArray()))
 	}
 	
 	fun init() {
@@ -48,14 +50,14 @@ object Game : EventEmitter() {
 		app.addToBody()
 		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
 		app.ticker.speed = 2.0
-		app.renderer.unsafeCast<Renderer>().addSystem(EventSystem::class.js.unsafeCast<ISystemConstructor<Renderer>>(), "events")
+//		tileMap.addToApplication(app)
 		window["app"] = app
 		emit("postInit")
 	}
 	
 	fun postInit() {
 		document.addEventListener("contextmenu", Event::preventDefault)
-		level = Level()
+		level = Level(blockTextures.map { it.value.baseTexture }.toTypedArray())
 		level.addToApplication(app)
 	}
 	
