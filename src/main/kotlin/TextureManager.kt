@@ -10,6 +10,16 @@ object TextureManager : EventEmitter() {
 	private val loader = Loader()
 	private val preLoadTextures = mutableMapOf<String, String>()
 	
+	init {
+		loader.onLoad.add({ _, resource ->
+			console.log("loaded texture: ${resource.name}")
+		})
+		
+		loader.onError.add({ err, _, resource ->
+			console.log("error loading texture: ${resource.name}\n$err")
+		})
+	}
+	
 	fun addPreLoadBlock(name: String) = addPreLoad("block.$name", "textures/blocks/$name.png")
 	
 	fun addPreLoad(name: String, path: String) {

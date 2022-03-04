@@ -1,25 +1,30 @@
-import blocks.PlainBlock
-import blocks.RegistryBlock
+
+import blocks.Block
+import blocks.BlockState
 import kotlinx.browser.document
 import kotlinx.browser.window
+import level.Level
+import math.toVec2I
 import org.w3c.dom.events.Event
-import pixi.externals.extensions.DisplayObjectEvents
-import pixi.externals.extensions.add
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
+import pixi.typings.core.ISystemConstructor
+import pixi.typings.core.Renderer
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
-import pixi.typings.interaction.interactive
+import pixi.typings.event.EventSystem
+import pixi.typings.interaction.Button
+import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
 import pixi.typings.utils.EventEmitter
 import pixi.utils.Application
-import pixi.utils.MouseEvents
 import pixi.utils.MouseManager
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
 	val mouseManager = MouseManager()
+	lateinit var level: Level
 	
 	init {
 		on("preInit") { preInit() }
@@ -28,7 +33,8 @@ object Game : EventEmitter() {
 	}
 	
 	fun preInit() {
-		RegistryBlock.blocks.forEach { TextureManager.addPreLoadBlock(it.name) }
+		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
+		TextureManager.addPreLoadBlock("air")
 		TextureManager.loadTextures()
 		TextureManager.on("loaded") {
 			emit("init")
@@ -40,39 +46,28 @@ object Game : EventEmitter() {
 			resizeTo = window
 		}
 		app.addToBody()
-		app.ticker.add(fn = ::update)
+		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
+		app.ticker.speed = 2.0
+		app.renderer.unsafeCast<Renderer>().addSystem(EventSystem::class.js.unsafeCast<ISystemConstructor<Renderer>>(), "events")
 		window["app"] = app
 		emit("postInit")
 	}
 	
 	fun postInit() {
 		document.addEventListener("contextmenu", Event::preventDefault)
-		
-		
-		mouseManager.on(MouseEvents.click) {
-			it.preventDefault()
-		}
-		
-		mouseManager.onMouseDown {
-			println("Mouse down at ${it.x} ${it.y} ${it.button}")
-			when (it.button.toInt()) {
-				2 -> {
-					PlainBlock(RegistryBlock.STONE).apply {
-						x = it.x
-						y = it.y
-						addToApplication(app)
-						emit("place")
-						interactive = true
-						on(DisplayObjectEvents.click) {
-							destroy(false)
-						}
-					}
-				}
-			}
-		}
+		level = Level()
+		level.addToApplication(app)
 	}
 	
 	fun update() {
-	
+		val blockPos = mouseManager.position.toVec2I() / 16
+		if (!level.inLevel(blockPos)) return
+		
+		if (mouseManager.isPressed(Button.MAIN)) {
+			level.removeBlockState(blockPos)
+		}
+		if (mouseManager.isPressed(Button.SECOND)) {
+			level.setBlockState(blockPos, BlockState(Block.blocks.find { it.visible }!!))
+		}
 	}
 }

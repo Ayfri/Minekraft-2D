@@ -1,13 +1,20 @@
 package blocks
 
-import Game.blockTextures
-import pixi.externals.extensions.on
-import pixi.typings.sprite.Sprite
-
-abstract class Block(val registryBlock: RegistryBlock) : Sprite() {
-	init {
-		on("place") {
-			texture = blockTextures[registryBlock.name]!!
-		}
+open class Block(val name: String) {
+	var visible = true
+	
+	fun register() {
+		println("Registering block: $name")
+		blocks += this
+	}
+	
+	override fun toString() = "Block(name='$name', visible=$visible)"
+	
+	companion object {
+		const val SIZE = 16
+		val blocks = mutableListOf<Block>()
+		
+		val AIR = AirBlock("air").apply(Block::register)
+		val STONE = Block("stone").apply(Block::register)
 	}
 }
