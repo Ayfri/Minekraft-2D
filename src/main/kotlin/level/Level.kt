@@ -1,54 +1,47 @@
 package level
 
 import Game
-import blocks.Block
+import app
 import blocks.BlockState
 import math.Vec2I
-import pixi.typings.core.BaseTexture
-import pixi.typings.core.IAutoDetectOptions
-import pixi.typings.core.Resource
-import pixi.typings.interaction.interactive
-import tilemap.CompositeRectTileLayer
+import pixi.externals.extensions.addToApplication
+import tilemap.CompositeTilemap
 
-class Level(tileset: Array<BaseTexture<Resource, IAutoDetectOptions>>) : CompositeRectTileLayer(tileset) {
+class Level {
 	val blockStates = MutableList(WIDTH * HEIGHT) { BlockState.AIR }
+	val tilemap = CompositeTilemap()
 	
 	init {
-		interactive = true
 		console.log("Level created")
+		tilemap.addToApplication(app)
 	}
 	
 	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until WIDTH && blockPos.y in 0 until HEIGHT
 	
 	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * WIDTH]
-	fun getBlockState(x: Int, y: Int) = blockStates[x + y * WIDTH]
+	inline fun getBlockState(x: Int, y: Int) = blockStates[x + y * WIDTH]
 	
 	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
 	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
 	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
+		if (getBlockState(x, y) == blockState) return
 		blockStates[x + y * WIDTH] = blockState
-		
-		val texture = Game.blockTextures[blockState.block.name] ?: return
-		val position = Vec2I(x, y) * Block.SIZE
-		
-//		children.find { it.position.toVec2I() == position }?.let {
-//			it.unsafeCast<Sprite>().texture = texture
-//			it.renderable = blockState.block.visible
-//		} ?: run {
-//			Sprite(texture).also {
-//				it.position.copyFrom(position.toPoint())
-//				it.renderable = blockState.block.visible
-//				addChild(it)
-//			}
-//		}
-		tile(texture, x * 16.0, y * 16.0)
-		blockState.emit("place", arrayOf(position))
+		render()
+	}
+	
+	fun render() {
+		tilemap.clear()
+		for (x in 0 until WIDTH) {
+			for (y in 0 until HEIGHT) {
+				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: return, x * 16.0, y * 16.0)
+			}
+		}
 	}
 	
 	fun setBlockState(position: Vec2I, blockState: BlockState) = setBlockState(position.x, position.y, blockState)
 	
-	fun updateBlockState(x: Int, y: Int) = blockStates[x + y * WIDTH].emit("update")
+	fun updateBlockState(x: Int, y: Int) = getBlockState(x, y).emit("update")
 	
 	companion object {
 		const val WIDTH = 50

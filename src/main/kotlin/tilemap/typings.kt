@@ -1,4 +1,4 @@
-@file:JsModule("@pixi/tilmap")
+@file:JsModule("@pixi/tilemap")
 
 package tilemap
 
