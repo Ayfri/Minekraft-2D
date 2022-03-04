@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.3")
-    implementation("io.github.ayfri:PIXI-Kotlin:0.2.2")
+    implementation("io.github.ayfri:PIXI-Kotlin:0.3.0")
 }
 
 kotlin {
