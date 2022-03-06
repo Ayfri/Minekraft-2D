@@ -31,7 +31,6 @@ class Level {
 			val result = preciseNoise * noise
 			
 			val grassLayer = (result * HEIGHT + 20).roundToInt()
-			console.log("result at x=$x: $result\ngrassLayer=$grassLayer\npreciseNoise=")
 			
 			for (y in grassLayer.coerceAtLeast(0) until HEIGHT) {
 				setBlockState(

@@ -1,3 +1,4 @@
+
 import blocks.Block
 import blocks.BlockState
 import client.Gui
@@ -13,6 +14,7 @@ import pixi.externals.extensions.on
 import pixi.externals.extensions.setPositionFromApplication
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
+import pixi.typings.graphics.Graphics
 import pixi.typings.sprite.Sprite
 import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
@@ -39,6 +41,10 @@ object Game : EventEmitter() {
 	)
 	val mouseManager = MouseManager()
 	val times = mutableListOf<Double>()
+	val outline = Graphics().apply {
+		lineStyle(1.0)
+		drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
+	}
 	var selectedBlock = Block.STONE
 		set(value) {
 			mainGui.children[0].unsafeCast<Sprite>().texture = blockTextures[value.name]!!
@@ -90,6 +96,7 @@ object Game : EventEmitter() {
 			addChild(selectedBlockSprite)
 			addToApplication(app)
 		}
+		outline.addToApplication(app)
 		
 		keyMap.onPress("1") { selectedBlock = Block.STONE }
 		keyMap.onPress("2") { selectedBlock = Block.GRASS }
@@ -97,9 +104,11 @@ object Game : EventEmitter() {
 	}
 	
 	fun update() {
-		val blockPos = mouseManager.position.toVec2I() / 16
+		val blockPos = (mouseManager.position.toVec2I()) / Block.SIZE
 		if (!level.inLevel(blockPos)) return
 		
+		outline.position.copyFrom((blockPos * Block.SIZE).toPoint())
+//		console.log(outline.position)
 		if (mouseManager.isPressed(0)) {
 			level.removeBlockState(blockPos)
 		}
