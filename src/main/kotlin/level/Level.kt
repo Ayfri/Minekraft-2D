@@ -6,7 +6,7 @@ import blocks.Block
 import blocks.BlockState
 import math.Vec2I
 import pixi.externals.extensions.addToApplication
-import tilemap.CompositeTilemap
+import typings.tilemap.CompositeTilemap
 import kotlin.math.roundToInt
 import kotlin.random.Random
 

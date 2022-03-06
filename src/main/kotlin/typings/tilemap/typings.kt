@@ -1,6 +1,6 @@
 @file:JsModule("@pixi/tilemap")
 
-package tilemap
+package typings.tilemap
 
 import kotlinx.js.JsPair
 import org.khronos.webgl.Float32Array

@@ -1,4 +1,3 @@
-
 import blocks.Block
 import blocks.BlockState
 import client.Gui
@@ -7,6 +6,7 @@ import kotlinx.browser.window
 import level.Level
 import math.toVec2I
 import org.w3c.dom.events.Event
+import pixi.externals.Color
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
@@ -20,6 +20,7 @@ import pixi.typings.utils.EventEmitter
 import pixi.utils.Application
 import pixi.utils.KeyMap
 import pixi.utils.MouseManager
+import typings.outline_filter.OutlineFilter
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
@@ -43,6 +44,7 @@ object Game : EventEmitter() {
 			mainGui.children[0].unsafeCast<Sprite>().texture = blockTextures[value.name]!!
 			field = value
 		}
+	
 	lateinit var level: Level
 	lateinit var mainGui: Gui
 	
@@ -82,7 +84,9 @@ object Game : EventEmitter() {
 			selectedBlockSprite.anchor.set(0.5)
 			selectedBlockSprite.setPositionFromApplication(app, 0.9, 0.1)
 			selectedBlockSprite.scale.set(4.0)
-
+			val filter = OutlineFilter(5.0, Color(255, 255, 255))
+			filter.padding = 2
+			selectedBlockSprite.filters = arrayOf(filter)
 			addChild(selectedBlockSprite)
 			addToApplication(app)
 		}
