@@ -1,6 +1,7 @@
 
 import blocks.Block
 import blocks.BlockState
+import client.DebugGUI
 import client.Gui
 import entities.Player
 import kotlinx.browser.document
@@ -13,6 +14,7 @@ import pixi.externals.Color
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
+import pixi.externals.extensions.plus
 import pixi.externals.extensions.setPositionFromApplication
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
@@ -53,6 +55,7 @@ object Game : EventEmitter() {
 			field = value
 		}
 	
+	lateinit var debugGUI: DebugGUI
 	lateinit var level: Level
 	lateinit var mainGui: Gui
 	lateinit var player: Player
@@ -102,6 +105,10 @@ object Game : EventEmitter() {
 		}
 		outline.addToApplication(app)
 		
+		debugGUI = DebugGUI()
+		debugGUI.position += 10.0
+		debugGUI.addToApplication(app)
+		
 		player = Player().apply {
 			setPosition(Vec2I(level.width / 2, level.height / 2))
 			addToApplication(app)
@@ -114,6 +121,7 @@ object Game : EventEmitter() {
 	
 	fun update() {
 		player.update()
+		debugGUI.update()
 		
 		val blockPos = (mouseManager.position.toVec2I()) / Block.SIZE
 		if (!level.inLevel(blockPos)) return

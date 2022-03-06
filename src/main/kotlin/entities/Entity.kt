@@ -17,7 +17,7 @@ import pixi.typings.sprite.Sprite
 abstract class Entity : Sprite() {
 	val canCollide = true
 	val hasGravity = true
-	var gravity = 0.0
+	val gravity = 0.3
 	var isColliding = false
 	var onGround = false
 	val velocity = Point()
@@ -60,7 +60,7 @@ abstract class Entity : Sprite() {
 				if (!tile.block.collidable) continue
 				
 				val tileArea = Rectangle(x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), Block.SIZE.toDouble(), Block.SIZE.toDouble())
-				if(!aabb.intersects(tileArea)) return
+				if (!aabb.intersects(tileArea)) continue
 				
 				val blockSide = when {
 					tileArea.left > aabb.right -> BlockSide.RIGHT
@@ -84,8 +84,7 @@ abstract class Entity : Sprite() {
 		position += velocity
 		if (hasGravity) velocity.y += gravity
 		if (canCollide) testCollision(Game.level)
-		if (!onGround) gravity += 0.03
-		else gravity = 0.0
+		if (onGround) velocity.y = 0.0
 		if (velocity.x > maxVelocity) velocity.x = maxVelocity
 		if (velocity.x < -maxVelocity) velocity.x = -maxVelocity
 	}
