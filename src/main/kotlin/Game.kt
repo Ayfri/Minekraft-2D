@@ -64,6 +64,7 @@ object Game : EventEmitter() {
 	fun postInit() {
 		document.addEventListener("contextmenu", Event::preventDefault)
 		level = Level()
+		level.generateWorld()
 		
 		keyMap.onPress("1") { selectedBlock = Block.STONE }
 		keyMap.onPress("2") { selectedBlock = Block.GRASS }
