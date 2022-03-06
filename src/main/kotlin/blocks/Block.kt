@@ -16,5 +16,7 @@ open class Block(val name: String) {
 		
 		val AIR = AirBlock("air").apply(Block::register)
 		val STONE = Block("stone").apply(Block::register)
+		val DIRT = Block("dirt").apply(Block::register)
+		val GRASS = Block("grass").apply(Block::register)
 	}
 }
