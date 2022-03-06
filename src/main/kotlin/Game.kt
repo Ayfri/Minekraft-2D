@@ -2,9 +2,11 @@
 import blocks.Block
 import blocks.BlockState
 import client.Gui
+import entities.Player
 import kotlinx.browser.document
 import kotlinx.browser.window
 import level.Level
+import math.Vec2I
 import math.toVec2I
 import org.w3c.dom.events.Event
 import pixi.externals.Color
@@ -53,6 +55,7 @@ object Game : EventEmitter() {
 	
 	lateinit var level: Level
 	lateinit var mainGui: Gui
+	lateinit var player: Player
 	
 	init {
 		on("preInit") { preInit() }
@@ -63,6 +66,7 @@ object Game : EventEmitter() {
 	fun preInit() {
 		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
 		TextureManager.addPreLoadBlock("air")
+		TextureManager.addPreLoad("player", "textures/player.png")
 		TextureManager.loadTextures()
 		TextureManager.on("loaded") {
 			emit("init")
@@ -98,17 +102,23 @@ object Game : EventEmitter() {
 		}
 		outline.addToApplication(app)
 		
+		player = Player().apply {
+			setPosition(Vec2I(level.width / 2, level.height / 2))
+			addToApplication(app)
+		}
+		
 		keyMap.onPress("1") { selectedBlock = Block.STONE }
 		keyMap.onPress("2") { selectedBlock = Block.GRASS }
 		keyMap.onPress("3") { selectedBlock = Block.DIRT }
 	}
 	
 	fun update() {
+		player.update()
+		
 		val blockPos = (mouseManager.position.toVec2I()) / Block.SIZE
 		if (!level.inLevel(blockPos)) return
 		
 		outline.position.copyFrom((blockPos * Block.SIZE).toPoint())
-//		console.log(outline.position)
 		if (mouseManager.isPressed(0)) {
 			level.removeBlockState(blockPos)
 		}

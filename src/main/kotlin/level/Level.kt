@@ -12,7 +12,9 @@ import kotlin.random.Random
 
 class Level {
 	val blockStates = MutableList(WIDTH * HEIGHT) { BlockState.AIR }
+	val height = HEIGHT
 	val tilemap = CompositeTilemap()
+	val width = WIDTH
 	private var generating = false
 	
 	init {
@@ -21,6 +23,7 @@ class Level {
 	}
 	
 	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until WIDTH && blockPos.y in 0 until HEIGHT
+	fun inLevel(x: Int, y: Int) = x in 0 until WIDTH && y in 0 until HEIGHT
 	
 	fun generateWorld() {
 		generating = true

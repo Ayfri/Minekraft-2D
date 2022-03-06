@@ -35,8 +35,12 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	
 	operator fun rangeTo(other: Vec2I) = Rectangle(toPoint(), other.toPoint())
 	
+	fun addX(x: Number) = Vec2I(this.x + x.toInt(), y)
+	fun addY(y: Number) = Vec2I(x, this.y + y.toInt())
+	fun bottomLeft() = addY(1)
 	fun distanceTo(other: Vec2I) = sqrt(((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y)).toDouble())
 	fun dot(other: Vec2I) = x * other.x + y * other.y
+	fun east() = addX(1)
 	fun negate() = !this
 	fun reset() {
 		x = 0
@@ -48,7 +52,9 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 		this.y = y.toInt()
 	}
 	
+	fun top() = addY(-1)
 	fun toPoint() = Point(x.toDouble(), y.toDouble())
+	fun west() = addX(-1)
 	
 	companion object {
 		val ZERO = Vec2I()
@@ -56,6 +62,9 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 		fun fromPoint(point: IPointData) = Vec2I(point.x, point.y)
 	}
 }
+
+fun IPointData.addX(x: Number) = apply { this.x += x.toInt() }
+fun IPointData.addY(y: Number) = apply { this.y += y.toInt() }
 
 fun IPointData.rounded(): IPointData {
 	round()

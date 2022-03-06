@@ -2,6 +2,7 @@ package blocks
 
 open class Block(val name: String) {
 	var visible = true
+	var collidable = true
 	
 	fun register() {
 		println("Registering block: $name")

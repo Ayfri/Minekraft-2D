@@ -9,6 +9,7 @@ lateinit var app: Application
 
 fun main() {
 	require("@pixi/tilemap")
+	require("@pixi/math-extras")
 	settings.SCALE_MODE = SCALE_MODES.NEAREST
 	window["game"] = Game
 	window.onload = { Game.emit("preInit") }
