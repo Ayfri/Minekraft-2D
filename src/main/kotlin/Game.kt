@@ -7,6 +7,7 @@ import entities.Player
 import kotlinx.browser.document
 import kotlinx.browser.window
 import level.Level
+import math.Direction
 import math.Vec2I
 import math.toVec2I
 import org.w3c.dom.events.Event
@@ -41,6 +42,9 @@ object Game : EventEmitter() {
 			"7" to setOf("7", "è"),
 			"8" to setOf("8", "_"),
 			"9" to setOf("9", "ç"),
+			"left" to setOf("ArrowLeft", "q"),
+			"right" to setOf("ArrowRight", "d"),
+			"space" to setOf(" "),
 		)
 	)
 	val mouseManager = MouseManager()
@@ -117,6 +121,14 @@ object Game : EventEmitter() {
 		keyMap.onPress("1") { selectedBlock = Block.STONE }
 		keyMap.onPress("2") { selectedBlock = Block.GRASS }
 		keyMap.onPress("3") { selectedBlock = Block.DIRT }
+		keyMap.onKeep("space") { player.jump() }
+		keyMap.onKeep("left") { player.move(Direction.LEFT) }
+		keyMap.onKeep("right") { player.move(Direction.RIGHT) }
+		
+		keyMap.keyboardManager.onPress("F3") {
+			it.preventDefault()
+			debugGUI.visible = !debugGUI.visible
+		}
 	}
 	
 	fun update() {

@@ -1,7 +1,10 @@
 package blocks
 
 import level.Level
+import math.Rectangle
 import math.Vec2I
+import pixi.typings.math.Rectangle
+import pixi.typings.math_extras.intersects
 import pixi.typings.utils.EventEmitter
 
 data class BlockState(val block: Block) : EventEmitter() {
@@ -21,6 +24,9 @@ data class BlockState(val block: Block) : EventEmitter() {
 		)
 	}
 	
+	fun getAABB(pos: Vec2I) = Rectangle(pos.x, pos.y, 1, 1)
+	
+	fun shouldCollide(other: Rectangle, pos: Vec2I) = getAABB(pos).intersects(other)
 	
 	companion object {
 		val AIR = BlockState(Block.AIR)

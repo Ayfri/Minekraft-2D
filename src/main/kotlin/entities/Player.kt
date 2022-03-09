@@ -4,5 +4,7 @@ package entities
 class Player : Entity() {
 	init {
 		setTexture("player")
+		width = 15.0
+		height = 28.0
 	}
 }

@@ -37,7 +37,8 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	
 	fun addX(x: Number) = Vec2I(this.x + x.toInt(), y)
 	fun addY(y: Number) = Vec2I(x, this.y + y.toInt())
-	fun bottomLeft() = addY(1)
+	fun add(x: Number, y: Number) = Vec2I(this.x + x.toInt(), this.y + y.toInt())
+	fun bottom() = addY(1)
 	fun distanceTo(other: Vec2I) = sqrt(((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y)).toDouble())
 	fun dot(other: Vec2I) = x * other.x + y * other.y
 	fun east() = addX(1)

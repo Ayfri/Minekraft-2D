@@ -53,6 +53,9 @@ class Level {
 	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * WIDTH]
 	inline fun getBlockState(x: Int, y: Int) = blockStates[x + y * WIDTH]
 	
+	fun getBlockStateOrNull(blockPos: Vec2I) = if (inLevel(blockPos)) getBlockState(blockPos) else null
+	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
+	
 	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
 	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
 	
