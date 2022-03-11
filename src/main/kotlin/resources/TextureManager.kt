@@ -1,4 +1,5 @@
-
+package resources
+import Game
 import kotlinext.js.getOwnPropertyNames
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
@@ -32,13 +33,14 @@ object TextureManager : EventEmitter() {
 			val textures = resources.getOwnPropertyNames().associateWith { resources[it]!!.texture }
 			
 			textures.filterNot { it.value == null }.forEach {
-				this.textures[it.key] = it.value!!
+				TextureManager.textures[it.key] = it.value!!
 				if (it.key.startsWith("block.")) {
 					Game.blockTextures[it.key.removePrefix("block.")] = it.value.unsafeCast<Texture<Resource>>()
 				}
 			}
 			
 			emit("loaded", arrayOf(textures))
+			preLoadTextures.clear()
 		}
 	}
 }

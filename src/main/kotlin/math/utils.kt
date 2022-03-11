@@ -9,3 +9,5 @@ fun Double.rounded(decimals: Int): Double {
 	repeat(decimals) { multiplier *= 10 }
 	return round(this * multiplier) / multiplier
 }
+
+fun randomBoolean(length : Int)  = (0..length).random() == 0

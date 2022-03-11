@@ -1,8 +1,9 @@
 package blocks
 
-class AirBlock(name: String) : Block(name) {
+open class AirBlock(name: String) : Block(name) {
 	init {
-		visible = false
+		blocksLight = false
 		collidable = false
+		visible = false
 	}
 }

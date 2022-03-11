@@ -25,6 +25,7 @@ import pixi.utils.Application
 import pixi.utils.KeyMap
 import pixi.utils.MouseManager
 import resources.GameProperties
+import resources.TextureManager
 import resources.parseGameProperties
 
 object Game : EventEmitter() {

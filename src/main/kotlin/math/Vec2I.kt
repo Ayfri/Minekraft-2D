@@ -15,6 +15,7 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	
 	operator fun plus(other: Vec2I) = Vec2I(x + other.x, y + other.y)
 	operator fun plus(factor: Number) = Vec2I(x + factor.toInt(), y + factor.toInt())
+	operator fun plus(direction: Direction) = Vec2I(this.x + direction.x, this.y + direction.y)
 	operator fun minus(other: Vec2I) = Vec2I(x - other.x, y - other.y)
 	operator fun minus(factor: Number) = Vec2I(x - factor.toInt(), y - factor.toInt())
 	operator fun times(other: Vec2I) = Vec2I(x * other.x, y * other.y)
@@ -36,6 +37,7 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	fun addX(x: Number) = Vec2I(this.x + x.toInt(), y)
 	fun addY(y: Number) = Vec2I(x, this.y + y.toInt())
 	fun add(x: Number, y: Number) = Vec2I(this.x + x.toInt(), this.y + y.toInt())
+	fun add(direction: Direction, length: Number = 1) = Vec2I(this.x + direction.x * length.toInt(), this.y + direction.y * length.toInt())
 	fun bottom() = addY(1)
 	fun distanceTo(other: Vec2I) = sqrt(((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y)).toDouble())
 	fun dot(other: Vec2I) = x * other.x + y * other.y

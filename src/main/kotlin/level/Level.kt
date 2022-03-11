@@ -5,28 +5,33 @@ import app
 import blocks.Block
 import blocks.BlockState
 import math.Vec2I
+import pixi.externals.extensions.add
 import pixi.externals.extensions.addToApplication
+import pixi.typings.ticker.Ticker
 import typings.tilemap.CompositeTilemap
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class Level {
 	val blockStates = MutableList(WIDTH * HEIGHT) { BlockState.AIR }
+	var blocksPerTick = 100
 	val height = HEIGHT
+	val ticksTicker = Ticker()
 	val tilemap = CompositeTilemap()
 	val width = WIDTH
-	private var generating = false
+	var updateRender = false
 	
 	init {
 		console.log("Level created")
 		tilemap.addToApplication(app)
+		ticksTicker.add { tick() }
+		ticksTicker.maxFPS = 20
 	}
 	
 	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until WIDTH && blockPos.y in 0 until HEIGHT
 	fun inLevel(x: Int, y: Int) = x in 0 until WIDTH && y in 0 until HEIGHT
 	
 	fun generateWorld() {
-		generating = true
 		val seed = Random.nextInt(Int.MAX_VALUE)
 		for (x in 0 until WIDTH) {
 			val preciseNoise = (1 + PerlinNoise.noise(((x * 10 + 0.1) / WIDTH) + seed, HEIGHT / 4.2)) / 6
@@ -46,7 +51,8 @@ class Level {
 			}
 		}
 		
-		generating = false
+		updateRender = true
+		ticksTicker.start()
 		render()
 	}
 	
@@ -66,18 +72,36 @@ class Level {
 	}
 	
 	fun render() {
-		if (generating) return
+		if (!updateRender) return
 		tilemap.clear()
 		for (x in 0 until WIDTH) {
 			for (y in 0 until HEIGHT) {
-				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: return, x * 16.0, y * 16.0)
+				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: return, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble())
 			}
 		}
 	}
 	
 	fun setBlockState(position: Vec2I, blockState: BlockState) = setBlockState(position.x, position.y, blockState)
 	
-	fun updateBlockState(x: Int, y: Int) = getBlockState(x, y).emit("update")
+	fun tick() {
+		for (i in 0..blocksPerTick) {
+			val x = Random.nextInt(WIDTH)
+			val y = Random.nextInt(HEIGHT)
+			tickBlockState(x, y)
+		}
+	}
+	
+	
+	fun tickBlockState(x: Int, y: Int) {
+		val blockState = getBlockState(x, y)
+		if (!blockState.block.tickable) return
+		blockState.block.emit("tick", arrayOf(blockState, Vec2I(x, y), this))
+	}
+	
+	fun updateBlockState(x: Int, y: Int) {
+		val blockState = getBlockState(x, y)
+		blockState.block.emit("update", arrayOf(blockState, Vec2I(x, y), this))
+	}
 	
 	companion object {
 		const val WIDTH = 128
