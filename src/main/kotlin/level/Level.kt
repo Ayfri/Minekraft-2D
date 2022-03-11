@@ -33,12 +33,14 @@ class Level {
 	
 	fun generateWorld() {
 		val seed = Random.nextInt(Int.MAX_VALUE)
-		for (x in 0 until WIDTH) {
-			val preciseNoise = (1 + PerlinNoise.noise(((x * 10 + 0.1) / WIDTH) + seed, HEIGHT / 4.2)) / 6
-			val noise = (1 + PerlinNoise.noise(((x + 0.1) / WIDTH) + seed, x.toDouble() / HEIGHT)) / 1.5
+		val surfaceLayers = mutableListOf<Int>()
+		for (x in 0 until width) {
+			val preciseNoise = (1 + PerlinNoise.noise(((x * 10 + 0.1) / width) + seed, HEIGHT / 4.2)) / 6
+			val noise = (1 + PerlinNoise.noise(((x + 0.1) / width) + seed, x.toDouble() / HEIGHT)) / 1.5
 			val result = preciseNoise * noise
 			
 			val grassLayer = (result * HEIGHT + 20).roundToInt()
+			surfaceLayers.add(grassLayer)
 			
 			for (y in grassLayer.coerceAtLeast(0) until HEIGHT) {
 				setBlockState(
@@ -49,6 +51,13 @@ class Level {
 					}
 				)
 			}
+		}
+		
+		var x = 5
+		while (x < width - 5) {
+			x += Random.nextInt(15).coerceAtLeast(5)
+			x = x.coerceAtMost(width - 1)
+			placeTree(Vec2I(x, surfaceLayers[x] - 1))
 		}
 		
 		updateRender = true
@@ -64,6 +73,28 @@ class Level {
 	
 	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
 	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
+	
+	fun placeTree(blockPos: Vec2I) {
+		val trunk = BlockState(Block.LOG)
+		val leaves = BlockState(Block.LEAVES)
+		val treeHeight = Random.nextInt(5, 7)
+		val leavesGroundHeight = Random.nextInt(2, 3)
+		
+		updateRender = false
+		
+		for (y in blockPos.y - treeHeight  .. blockPos.y - leavesGroundHeight) {
+			for (x in blockPos.x - 1..blockPos.x + 1) {
+				setBlockState(x, y, leaves)
+			}
+		}
+		
+		for (y in blockPos.y - treeHeight + 2 ..blockPos.y) {
+			setBlockState(blockPos.x, y, trunk)
+		}
+		
+		
+		updateRender = true
+	}
 	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
