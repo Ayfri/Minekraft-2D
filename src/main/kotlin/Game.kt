@@ -120,11 +120,7 @@ object Game : EventEmitter() {
 		if (!level.inLevel(blockPos)) return
 		hoverBlock = LevelBlock(level.getBlockState(blockPos).block, blockPos)
 		
-		if (mouseManager.isPressed(0)) {
-			level.removeBlockState(blockPos)
-		}
-		if (mouseManager.isPressed(2)) {
-			level.setBlockState(blockPos, BlockState(placingBlock))
-		}
+		if (mouseManager.isPressed(0)) level.removeBlockState(blockPos)
+		if (mouseManager.isPressed(2)) level.setBlockState(blockPos, BlockState(placingBlock))
 	}
 }

@@ -2,12 +2,13 @@ package entities
 
 import Game
 import blocks.Block
-import blocks.BlockState
 import level.Level
 import math.Direction
 import math.EPSILON
 import math.Vec2I
 import math.addY
+import math.div
+import math.times
 import pixi.externals.extensions.div
 import pixi.externals.extensions.inflate
 import pixi.externals.extensions.plus
@@ -15,7 +16,6 @@ import pixi.externals.extensions.times
 import pixi.externals.extensions.toPoint
 import pixi.typings.core.Texture
 import pixi.typings.math.Point
-import pixi.typings.math.Rectangle
 import pixi.typings.sprite.Sprite
 import kotlin.math.abs
 
@@ -28,9 +28,9 @@ abstract class Entity : Sprite() {
 	val velocity = Point()
 	private val maxVelocity = 10.0
 	
-	var blockPos get() = (position.clone().addY(height / 4)) / Block.SIZE.toDouble()
+	var blockPos get() = position.clone().addY(height / 4) / Block.SIZE
 		set(value) {
-			position.copyFrom((value.toPoint() * Block.SIZE.toDouble()) + Point(0.0, height / 4))
+			position.copyFrom(value.toPoint() * Block.SIZE + Point(0.0, height / 4))
 		}
 	
 	init {
@@ -40,7 +40,7 @@ abstract class Entity : Sprite() {
 	fun canMove(level: Level) {
 		val entityRect = getAABB()
 		val entityRectTests = entityRect.inflate(0.5, 0.5)
-		val collided = arrayOf(false, false)
+		val collided = booleanArrayOf(false, false)
 		
 		for (blockX in entityRectTests.left.toInt()..entityRectTests.right.toInt()) {
 			for (blockY in entityRectTests.top.toInt()..entityRectTests.bottom.toInt()) {
@@ -73,11 +73,7 @@ abstract class Entity : Sprite() {
 		if (!collided[1]) onGround = false
 	}
 	
-	fun getAABB(): Rectangle {
-		val rect = getBounds()
-		rect / Block.SIZE.toDouble()
-		return rect
-	}
+	fun getAABB() = getBounds().clone().apply { this / Block.SIZE.toDouble() }
 	
 	fun jump(force: Double = 3.5) {
 		if (onGround) {
@@ -126,5 +122,3 @@ abstract class Entity : Sprite() {
 		velocity.x *= if (onGround) 0.7 else 0.9
 	}
 }
-
-data class HitCollision(var position: Vec2I, var blockState: BlockState? = null, var entity: Entity? = null, val side: Direction? = null)

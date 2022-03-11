@@ -2,7 +2,7 @@ package client
 
 import Game
 import app
-import math.round
+import math.rounded
 import pixi.externals.extensions.setPositionFromWindow
 import pixi.typings.text.Text
 import pixi.typings.text.TextStyle
@@ -38,7 +38,7 @@ object DebugGUI : Gui() {
 		if (fpsValues.size > 60) fpsValues.removeAt(0)
 		
 		FPS.text = """
-			FPS: ${fpsValues.average().round(2)}
+			FPS: ${fpsValues.average().rounded(2)}
 			Frame Time: ${app.ticker.deltaMS.toString().take(2)}ms
 		""".trimIndent()
 		
