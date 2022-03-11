@@ -115,8 +115,10 @@ object Game : EventEmitter() {
 		}
 		
 		keyMap.onPress("1") { placingBlock = Block.STONE }
-		keyMap.onPress("2") { placingBlock = Block.GRASS }
-		keyMap.onPress("3") { placingBlock = Block.DIRT }
+		keyMap.onPress("2") { placingBlock = Block.DIRT }
+		keyMap.onPress("3") { placingBlock = Block.GRASS }
+		keyMap.onPress("4") { placingBlock = Block.LOG }
+		keyMap.onPress("5") { placingBlock = Block.LEAVES }
 		keyMap.onKeep("space") { player.jump() }
 		keyMap.onKeep("left") { player.move(Direction.LEFT) }
 		keyMap.onKeep("right") { player.move(Direction.RIGHT) }

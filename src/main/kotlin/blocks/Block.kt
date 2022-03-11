@@ -19,5 +19,7 @@ open class Block(val name: String) {
 		val STONE = Block("stone").apply(Block::register)
 		val DIRT = Block("dirt").apply(Block::register)
 		val GRASS = Block("grass").apply(Block::register)
+		val LOG = Block("log").apply(Block::register)
+		val LEAVES = Block("leaves").apply(Block::register)
 	}
 }

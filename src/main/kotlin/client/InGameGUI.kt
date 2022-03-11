@@ -3,23 +3,30 @@ package client
 import Game
 import app
 import blocks.Block
+import math.add
 import pixi.externals.Color
 import pixi.externals.extensions.setPositionFromApplication
 import pixi.externals.extensions.times
 import pixi.typings.graphics.Graphics
 import pixi.typings.sprite.Sprite
-import typings.outline_filter.OutlineFilter
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object InGameGUI : Gui() {
+	val selectedBlockSize = 64
 	val selectedBlockSprite = Sprite.from("block.stone").also {
 		it.anchor.set(0.5)
 		it.setPositionFromApplication(app, 0.9, 0.1)
-		it.scale.set(4.0)
-		
-		val filter = OutlineFilter(5.0, Color(255, 255, 255))
-		filter.padding = 2
-		it.filters = arrayOf(filter)
+		it.width = selectedBlockSize.toDouble()
+		it.height = selectedBlockSize.toDouble()
+		addChild(it)
+	}
+	
+	val outline = Graphics().also {
+		it.lineStyle(3.0, Color(255, 255, 255))
+		it.drawRect(0.0, 0.0, selectedBlockSize.toDouble(), selectedBlockSize.toDouble())
+		it.setPositionFromApplication(app, 0.9, 0.1)
+		it.position.add(-selectedBlockSize / 2, -selectedBlockSize / 2)
+		it.position.add(-1.5, -1.5)
 		addChild(it)
 	}
 	
@@ -27,15 +34,15 @@ object InGameGUI : Gui() {
 		addChild(it)
 	}
 	
-	val outline = Graphics().also {
+	val selectedLevelBlockOutline = Graphics().also {
 		it.lineStyle(1.0)
 		it.drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
 		addChild(it)
 	}
 	
 	fun update() {
-		outline.visible = Game.hoverBlock.block.visible
-		outline.position.copyFrom(Game.hoverBlock.position.toPoint() * Block.SIZE.toDouble())
+		selectedLevelBlockOutline.visible = Game.hoverBlock.block.visible
+		selectedLevelBlockOutline.position.copyFrom(Game.hoverBlock.position.toPoint() * Block.SIZE.toDouble())
 		
 		if (version.text == "") {
 			console.log(Game.gameProperties)
