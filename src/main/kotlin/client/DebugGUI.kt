@@ -1,9 +1,12 @@
 package client
 
 import Game
+import app
+import math.round
 import pixi.externals.extensions.setPositionFromWindow
 import pixi.typings.text.Text
 import pixi.typings.text.TextStyle
+import pixi.typings.ticker.ticker
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object DebugGUI : Gui() {
@@ -13,7 +16,14 @@ object DebugGUI : Gui() {
 		fill = "#ffffff"
 	}
 	
+	val FPS = Text("", style).also {
+		addChild(it)
+	}
+	
+	val fpsValues = mutableListOf<Double>()
+	
 	val playerText = Text("", style).also {
+		it.setPositionFromWindow(0.0, 0.1)
 		addChild(it)
 	}
 	
@@ -23,6 +33,15 @@ object DebugGUI : Gui() {
 	}
 	
 	fun update() {
+		
+		fpsValues.add(app.ticker.FPS)
+		if (fpsValues.size > 60) fpsValues.removeAt(0)
+		
+		FPS.text = """
+			FPS: ${fpsValues.average().round(2)}
+			Frame Time: ${app.ticker.deltaMS.toString().take(2)}ms
+		""".trimIndent()
+		
 		playerText.text = """
 			inHorizontalCollision = ${Game.player.inHorizontalCollision}
 			onGround = ${Game.player.onGround}
@@ -36,7 +55,6 @@ object DebugGUI : Gui() {
 			AABB = ${Game.player.getAABB()}
 			top = ${Game.player.getAABB().top} left = ${Game.player.getAABB().left} right = ${Game.player.getAABB().right} bottom = ${Game.player.getAABB().bottom}
 		""".trimIndent()
-		
 		
 		val rect = Game.hoverBlock.blockState.getAABB(Game.hoverBlock.position)
 		selectedBlockText.text = """
