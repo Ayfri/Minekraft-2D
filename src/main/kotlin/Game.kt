@@ -1,4 +1,3 @@
-
 import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
@@ -12,11 +11,13 @@ import math.Direction
 import math.Vec2I
 import math.toVec2I
 import org.w3c.dom.events.Event
+import pixi.externals.Color
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
+import pixi.typings.sprite.Sprite
 import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
 import pixi.typings.utils.EventEmitter
@@ -52,6 +53,7 @@ object Game : EventEmitter() {
 			field = value
 		}
 	
+	lateinit var background: Sprite
 	lateinit var gameProperties: GameProperties
 	lateinit var level: Level
 	lateinit var player: Player
@@ -72,20 +74,29 @@ object Game : EventEmitter() {
 		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
 		TextureManager.addPreLoadBlock("air")
 		TextureManager.addPreLoad("player", "textures/player.png")
+		TextureManager.addPreLoad("background", "textures/background.png")
 		TextureManager.loadTextures()
 		TextureManager.on("loaded") {
+			background = Sprite.from("background")
 			emit("init")
 		}
 	}
 	
 	fun init() {
 		app = Application {
+			backgroundColor = Color(100, 180, 255)
 			resizeTo = window
 			resolution = window.devicePixelRatio
 		}
 		app.addToBody()
 		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
 		window["app"] = app
+		background.apply {
+			addToApplication(app)
+			width = app.screen.width
+			height = app.screen.height
+			zIndex = -1
+		}
 		loadGameProperties()
 	}
 	
