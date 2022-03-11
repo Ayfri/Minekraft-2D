@@ -20,20 +20,26 @@ object InGameGUI : Gui() {
 		val filter = OutlineFilter(5.0, Color(255, 255, 255))
 		filter.padding = 2
 		it.filters = arrayOf(filter)
+		addChild(it)
 	}
 	
-	val outline = Graphics().apply {
-		lineStyle(1.0)
-		drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
+	val version = text {
+		addChild(it)
 	}
 	
-	init {
-		addChild(selectedBlockSprite)
-		addChild(outline)
+	val outline = Graphics().also {
+		it.lineStyle(1.0)
+		it.drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
+		addChild(it)
 	}
 	
 	fun update() {
 		outline.visible = Game.hoverBlock.block.visible
 		outline.position.copyFrom(Game.hoverBlock.position.toPoint() * Block.SIZE.toDouble())
+		
+		if (version.text == "") {
+			console.log(Game.gameProperties)
+			version.text = "${Game.gameProperties.name} ${Game.gameProperties.version}"
+		}
 	}
 }

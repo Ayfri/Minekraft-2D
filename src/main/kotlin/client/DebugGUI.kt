@@ -3,37 +3,34 @@ package client
 import Game
 import app
 import math.rounded
+import pixi.externals.extensions.hide
 import pixi.externals.extensions.setPositionFromWindow
-import pixi.typings.text.Text
-import pixi.typings.text.TextStyle
 import pixi.typings.ticker.ticker
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object DebugGUI : Gui() {
-	val style = TextStyle().apply {
-		fontSize = 14
-		fontFamily = "Arial"
-		fill = "#ffffff"
-	}
-	
-	val FPS = Text("", style).also {
+	val FPS= text {
+		it.setPositionFromWindow(0.0, 0.05)
 		addChild(it)
 	}
 	
 	val fpsValues = mutableListOf<Double>()
 	
-	val playerText = Text("", style).also {
+	val playerText = text {
 		it.setPositionFromWindow(0.0, 0.1)
 		addChild(it)
 	}
 	
-	val selectedBlockText = Text("", style).also {
+	val selectedBlockText = text {
 		it.setPositionFromWindow(0.8, 0.0)
 		addChild(it)
 	}
 	
+	init {
+		hide()
+	}
+	
 	fun update() {
-		
 		fpsValues.add(app.ticker.FPS)
 		if (fpsValues.size > 60) fpsValues.removeAt(0)
 		

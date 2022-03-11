@@ -23,6 +23,8 @@ import pixi.typings.utils.EventEmitter
 import pixi.utils.Application
 import pixi.utils.KeyMap
 import pixi.utils.MouseManager
+import resources.GameProperties
+import resources.parseGameProperties
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
@@ -50,6 +52,7 @@ object Game : EventEmitter() {
 			field = value
 		}
 	
+	lateinit var gameProperties: GameProperties
 	lateinit var level: Level
 	lateinit var player: Player
 	
@@ -59,7 +62,13 @@ object Game : EventEmitter() {
 		on("postInit") { postInit() }
 	}
 	
+	fun loadGameProperties() {
+		if (!Game::gameProperties.isInitialized) window.setTimeout({ loadGameProperties() }, 500)
+		else emit("postInit")
+	}
+	
 	fun preInit() {
+		parseGameProperties()
 		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
 		TextureManager.addPreLoadBlock("air")
 		TextureManager.addPreLoad("player", "textures/player.png")
@@ -77,7 +86,7 @@ object Game : EventEmitter() {
 		app.addToBody()
 		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
 		window["app"] = app
-		emit("postInit")
+		loadGameProperties()
 	}
 	
 	fun postInit() {
@@ -87,6 +96,7 @@ object Game : EventEmitter() {
 		
 		InGameGUI.addToApplication(app)
 		DebugGUI.addToApplication(app)
+		window["debug"] = InGameGUI
 		
 		player = Player().apply {
 			setPosition(Vec2I(level.width / 2, level.height / 2))
