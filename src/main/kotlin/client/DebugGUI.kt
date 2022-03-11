@@ -1,15 +1,12 @@
 package client
 
 import Game
-import blocks.Block
-import math.toVec2I
-import pixi.externals.extensions.div
 import pixi.externals.extensions.setPositionFromWindow
 import pixi.typings.text.Text
 import pixi.typings.text.TextStyle
 
 @Suppress("JS_FAKE_NAME_CLASH")
-class DebugGUI : Gui() {
+object DebugGUI : Gui() {
 	val style = TextStyle().apply {
 		fontSize = 14
 		fontFamily = "Arial"
@@ -40,17 +37,16 @@ class DebugGUI : Gui() {
 			top = ${Game.player.getAABB().top} left = ${Game.player.getAABB().left} right = ${Game.player.getAABB().right} bottom = ${Game.player.getAABB().bottom}
 		""".trimIndent()
 		
-		val blockPos = (Game.mouseManager.position.clone() / Block.SIZE.toDouble()).toVec2I()
-		val blockState = Game.level.getBlockState(blockPos.x, blockPos.y)
-		val rect = blockState.getAABB(blockPos)
+		
+		val rect = Game.hoverBlock.blockState.getAABB(Game.hoverBlock.position)
 		selectedBlockText.text = """
-			x = ${blockPos.x}
-			y = ${blockPos.y}
+			x = ${Game.hoverBlock.x}
+			y = ${Game.hoverBlock.y}
 			top = ${rect.top}
 			bottom = ${rect.bottom}
 			left = ${rect.left}
 			right = ${rect.right}
-			block = ${blockState.block.name}
+			block = ${Game.hoverBlock.block.name}
 		""".trimIndent()
 	}
 }

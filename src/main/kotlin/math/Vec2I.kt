@@ -1,10 +1,8 @@
 package math
 
 import pixi.externals.extensions.Rectangle
-import pixi.externals.extensions.round
 import pixi.typings.math.IPointData
 import pixi.typings.math.Point
-import pixi.typings.math.Rectangle
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -64,12 +62,3 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	}
 }
 
-fun IPointData.addX(x: Number) = apply { this.x += x.toInt() }
-fun IPointData.addY(y: Number) = apply { this.y += y.toInt() }
-
-fun IPointData.rounded(): IPointData {
-	round()
-	return this
-}
-fun IPointData.toVec2I() = Vec2I(x, y)
-operator fun Rectangle.contains(vec: Vec2I) = vec.x.toDouble() in left..right && vec.y.toDouble() in top..bottom
