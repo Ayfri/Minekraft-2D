@@ -53,9 +53,10 @@ class Level {
 			}
 		}
 		
-		var x = 5
-		while (x < width - 5) {
-			x += Random.nextInt(15).coerceAtLeast(5)
+		val minimumDistance = 6
+		var x = minimumDistance
+		while (x < width - minimumDistance) {
+			x += Random.nextInt(18).coerceAtLeast(minimumDistance)
 			x = x.coerceAtMost(width - 1)
 			placeTree(Vec2I(x, surfaceLayers[x] - 1))
 		}
@@ -77,7 +78,7 @@ class Level {
 	fun placeTree(blockPos: Vec2I) {
 		val trunk = BlockState(Block.LOG)
 		val leaves = BlockState(Block.LEAVES)
-		val treeHeight = Random.nextInt(5, 7)
+		val treeHeight = Random.nextInt(5, 8)
 		val leavesGroundHeight = Random.nextInt(2, 3)
 		
 		updateRender = false
@@ -88,9 +89,19 @@ class Level {
 			}
 		}
 		
+		for (y in blockPos.y - treeHeight + 1 until blockPos.y  - leavesGroundHeight) {
+			setBlockState(blockPos.x - 2, y, leaves)
+		}
+		
+		for (y in blockPos.y - treeHeight + 1 until blockPos.y  - leavesGroundHeight) {
+			setBlockState(blockPos.x + 2, y, leaves)
+		}
+		
 		for (y in blockPos.y - treeHeight + 2 ..blockPos.y) {
 			setBlockState(blockPos.x, y, trunk)
 		}
+		
+		
 		
 		
 		updateRender = true
