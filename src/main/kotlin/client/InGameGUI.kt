@@ -18,25 +18,29 @@ object InGameGUI : Gui() {
 		it.setPositionFromApplication(app, 0.9, 0.1)
 		it.width = selectedBlockSize.toDouble()
 		it.height = selectedBlockSize.toDouble()
+		zIndex = 1001
 		addChild(it)
 	}
 	
-	val outline = Graphics().also {
+	val selectedBlockSpriteOutline = Graphics().also {
 		it.lineStyle(3.0, Color(255, 255, 255))
 		it.drawRect(0.0, 0.0, selectedBlockSize.toDouble(), selectedBlockSize.toDouble())
 		it.setPositionFromApplication(app, 0.9, 0.1)
 		it.position.add(-selectedBlockSize / 2, -selectedBlockSize / 2)
 		it.position.add(-1.5, -1.5)
+		zIndex = 1002
 		addChild(it)
 	}
 	
 	val version = text {
+		zIndex = 1001
 		addChild(it)
 	}
 	
 	val selectedLevelBlockOutline = Graphics().also {
 		it.lineStyle(1.0)
 		it.drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
+		zIndex = 1000
 		addChild(it)
 	}
 	

@@ -12,7 +12,6 @@ import math.times
 import pixi.externals.extensions.div
 import pixi.externals.extensions.inflate
 import pixi.externals.extensions.plus
-import pixi.externals.extensions.times
 import pixi.externals.extensions.toPoint
 import pixi.typings.core.Texture
 import pixi.typings.math.Point
@@ -35,6 +34,7 @@ abstract class Entity : Sprite() {
 	
 	init {
 		anchor.set(0.5)
+		zIndex = 100
 	}
 	
 	fun canMove(level: Level) {

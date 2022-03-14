@@ -11,6 +11,7 @@ import pixi.typings.ticker.ticker
 object DebugGUI : Gui() {
 	val FPS= text {
 		it.setPositionFromWindow(0.0, 0.05)
+		zIndex = 1001
 		addChild(it)
 	}
 	
@@ -18,11 +19,13 @@ object DebugGUI : Gui() {
 	
 	val playerText = text {
 		it.setPositionFromWindow(0.0, 0.1)
+		zIndex = 1001
 		addChild(it)
 	}
 	
 	val selectedBlockText = text {
 		it.setPositionFromWindow(0.8, 0.0)
+		zIndex = 1001
 		addChild(it)
 	}
 	

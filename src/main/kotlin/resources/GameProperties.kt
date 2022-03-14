@@ -26,6 +26,7 @@ fun <O : JsObject<V>, V> O.apply(obj: Any?): O {
 
 class GameProperties : JsObject<String>() {
 	val name = "Minekraft"
+	val saveFormat by "saveFormat"
 	val version by "version"
 }
 

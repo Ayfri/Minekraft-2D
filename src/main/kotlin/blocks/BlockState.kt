@@ -40,8 +40,10 @@ data class BlockState(var block: Block) {
 		level.render()
 	}
 	
-	
 	fun shouldCollide(other: Rectangle, pos: Vec2I) = getAABB(pos).intersects(other)
+	
+	@JsName("toJSON")
+	fun toJSON() = block.toJSON()
 	
 	override fun equals(other: Any?): Boolean {
 		if (other !is BlockState) return false
@@ -50,7 +52,6 @@ data class BlockState(var block: Block) {
 	}
 	
 	override fun hashCode() = block.hashCode()
-	
 	
 	companion object {
 		val AIR = BlockState(Block.AIR)

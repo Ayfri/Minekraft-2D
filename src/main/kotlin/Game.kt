@@ -1,3 +1,4 @@
+
 import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
@@ -7,6 +8,8 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import level.Level
 import level.LevelBlock
+import level.loadLevel
+import level.toSave
 import math.Direction
 import math.Vec2I
 import math.toVec2I
@@ -45,7 +48,8 @@ object Game : EventEmitter() {
 			"left" to setOf("ArrowLeft", "q"),
 			"right" to setOf("ArrowRight", "d"),
 			"space" to setOf(" "),
-		)
+		),
+		ignoreCase = true
 	)
 	val mouseManager = MouseManager()
 	var placingBlock = Block.STONE
@@ -133,12 +137,24 @@ object Game : EventEmitter() {
 			it.preventDefault()
 			DebugGUI.visible = !DebugGUI.visible
 		}
+		
+		keyMap.keyboardManager.onPress("T") {
+			window["save"] = level.toSave()
+		}
+		
+		keyMap.keyboardManager.onPress("Y") {
+			level.destroy()
+			level = loadLevel(window["save"] as String)
+			level.updateRender = true
+			level.render()
+		}
 	}
 	
 	fun update() {
 		player.update()
 		DebugGUI.update()
 		InGameGUI.update()
+		app.stage.sortChildren()
 		
 		val blockPos = (mouseManager.position.toVec2I()) / Block.SIZE
 		if (!level.inLevel(blockPos)) return

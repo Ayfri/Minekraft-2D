@@ -12,37 +12,41 @@ import typings.tilemap.CompositeTilemap
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-class Level {
-	val blockStates = MutableList(WIDTH * HEIGHT) { BlockState.AIR }
+
+class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
+	val blockStates = MutableList(height * width) { BlockState.AIR }
 	var blocksPerTick = 100
-	val height = HEIGHT
 	val ticksTicker = Ticker()
 	val tilemap = CompositeTilemap()
-	val width = WIDTH
 	var updateRender = false
 	
 	init {
-		console.log("Level created")
+		tilemap.zIndex = 10
 		tilemap.addToApplication(app)
 		ticksTicker.add { tick() }
 		ticksTicker.maxFPS = 20
 	}
 	
-	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until WIDTH && blockPos.y in 0 until HEIGHT
-	fun inLevel(x: Int, y: Int) = x in 0 until WIDTH && y in 0 until HEIGHT
+	fun destroy() {
+		ticksTicker.destroy()
+		tilemap.destroy(false)
+	}
+	
+	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until width && blockPos.y in 0 until height
+	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
 	
 	fun generateWorld() {
 		val seed = Random.nextInt(Int.MAX_VALUE)
 		val surfaceLayers = mutableListOf<Int>()
 		for (x in 0 until width) {
-			val preciseNoise = (1 + PerlinNoise.noise(((x * 10 + 0.1) / width) + seed, HEIGHT / 4.2)) / 6
-			val noise = (1 + PerlinNoise.noise(((x + 0.1) / width) + seed, x.toDouble() / HEIGHT)) / 1.5
+			val preciseNoise = (1 + PerlinNoise.noise(((x * 10 + 0.1) / width) + seed, height / 4.2)) / 6
+			val noise = (1 + PerlinNoise.noise(((x + 0.1) / width) + seed, x.toDouble() / height)) / 1.5
 			val result = preciseNoise * noise
 			
-			val grassLayer = (result * HEIGHT + 20).roundToInt()
+			val grassLayer = (result * height + 20).roundToInt()
 			surfaceLayers.add(grassLayer)
 			
-			for (y in grassLayer.coerceAtLeast(0) until HEIGHT) {
+			for (y in grassLayer.coerceAtLeast(0) until height) {
 				setBlockState(
 					x, y, when (y) {
 						grassLayer -> BlockState(Block.GRASS)
@@ -61,13 +65,14 @@ class Level {
 			placeTree(Vec2I(x, surfaceLayers[x] - 1))
 		}
 		
+		console.log("Level generated")
 		updateRender = true
 		ticksTicker.start()
 		render()
 	}
 	
-	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * WIDTH]
-	inline fun getBlockState(x: Int, y: Int) = blockStates[x + y * WIDTH]
+	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * width]
+	inline fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
 	
 	fun getBlockStateOrNull(blockPos: Vec2I) = if (inLevel(blockPos)) getBlockState(blockPos) else null
 	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
@@ -83,41 +88,38 @@ class Level {
 		
 		updateRender = false
 		
-		for (y in blockPos.y - treeHeight  .. blockPos.y - leavesGroundHeight) {
+		for (y in blockPos.y - treeHeight..blockPos.y - leavesGroundHeight) {
 			for (x in blockPos.x - 1..blockPos.x + 1) {
 				setBlockState(x, y, leaves)
 			}
 		}
 		
-		for (y in blockPos.y - treeHeight + 1 until blockPos.y  - leavesGroundHeight) {
+		for (y in blockPos.y - treeHeight + 1 until blockPos.y - leavesGroundHeight) {
 			setBlockState(blockPos.x - 2, y, leaves)
 		}
 		
-		for (y in blockPos.y - treeHeight + 1 until blockPos.y  - leavesGroundHeight) {
+		for (y in blockPos.y - treeHeight + 1 until blockPos.y - leavesGroundHeight) {
 			setBlockState(blockPos.x + 2, y, leaves)
 		}
 		
-		for (y in blockPos.y - treeHeight + 2 ..blockPos.y) {
+		for (y in blockPos.y - treeHeight + 2..blockPos.y) {
 			setBlockState(blockPos.x, y, trunk)
 		}
-		
-		
-		
 		
 		updateRender = true
 	}
 	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
-		blockStates[x + y * WIDTH] = blockState
+		blockStates[x + y * width] = blockState
 		render()
 	}
 	
 	fun render() {
 		if (!updateRender) return
 		tilemap.clear()
-		for (x in 0 until WIDTH) {
-			for (y in 0 until HEIGHT) {
+		for (x in 0 until width) {
+			for (y in 0 until height) {
 				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: return, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble())
 			}
 		}
@@ -127,8 +129,8 @@ class Level {
 	
 	fun tick() {
 		for (i in 0..blocksPerTick) {
-			val x = Random.nextInt(WIDTH)
-			val y = Random.nextInt(HEIGHT)
+			val x = Random.nextInt(width)
+			val y = Random.nextInt(height)
 			tickBlockState(x, y)
 		}
 	}
@@ -138,6 +140,33 @@ class Level {
 		val blockState = getBlockState(x, y)
 		if (!blockState.block.tickable) return
 		blockState.block.emit("tick", arrayOf(blockState, Vec2I(x, y), this))
+	}
+	
+	@JsName("toJSON")
+	fun toJSON(): SaveFile {
+		val blocks = mutableListOf<MutableList<Int>>()
+		val values = blockStates.distinct()
+		
+		var currentBlock = blockStates[0]
+		var currentCount = 0
+		blockStates.forEach {
+			if (it == currentBlock) {
+				currentCount++
+			} else {
+				blocks += mutableListOf(values.indexOf(currentBlock), currentCount)
+				currentBlock = it
+				currentCount = 1
+			}
+		}
+		blocks += mutableListOf(values.indexOf(currentBlock), currentCount)
+		
+		return SaveFile().apply {
+			this.format = Game.gameProperties.saveFormat.toInt()
+			this.blocks = blocks
+			this.values = values.map { it.toJSON() }.toMutableList()
+			this@apply.height = this@Level.height
+			this@apply.width = this@Level.width
+		}
 	}
 	
 	fun updateBlockState(x: Int, y: Int) {

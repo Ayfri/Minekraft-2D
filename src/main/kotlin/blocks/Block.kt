@@ -1,5 +1,6 @@
 package blocks
 
+import level.SaveBlock
 import pixi.typings.ListenerFn
 import pixi.typings.utils.EventEmitter
 
@@ -24,6 +25,9 @@ open class Block(val name: String) : EventEmitter() {
 		tickable = true
 		return super.once(event, fn, null)
 	}
+	
+	@JsName("toJSON")
+	fun toJSON() = SaveBlock(name)
 	
 	override fun equals(other: Any?): Boolean {
 		if (other !is Block) return false
@@ -61,5 +65,7 @@ open class Block(val name: String) : EventEmitter() {
 			blocksLight = false
 			register()
 		}
+		
+		fun fromSaveBlock(saveBlock: SaveBlock) = blocks.find { it.name == saveBlock.n } ?: AIR
 	}
 }

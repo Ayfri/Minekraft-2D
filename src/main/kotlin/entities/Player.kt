@@ -6,5 +6,6 @@ class Player : Entity() {
 		setTexture("player")
 		width = 15.0
 		height = 28.0
+		zIndex = 150
 	}
 }
