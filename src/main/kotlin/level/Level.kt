@@ -4,9 +4,13 @@ import Game
 import app
 import blocks.Block
 import blocks.BlockState
+import math.AABB
 import math.Vec2I
+import math.x2
+import math.y2
 import pixi.externals.extensions.add
 import pixi.externals.extensions.addToApplication
+import pixi.typings.math.Rectangle
 import pixi.typings.ticker.Ticker
 import typings.tilemap.CompositeTilemap
 import kotlin.math.roundToInt
@@ -69,6 +73,25 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		updateRender = true
 		ticksTicker.start()
 		render()
+	}
+	
+	fun getAABBs(rectangle: Rectangle): List<AABB> {
+		val aabbs = mutableListOf<AABB>()
+		
+		val x1 = rectangle.x.roundToInt()
+		val y1 = rectangle.y.roundToInt()
+		val x2 = rectangle.x2.roundToInt()
+		val y2 = rectangle.y2.roundToInt()
+		
+		for (x in x1..x2) {
+			for (y in y1..y2) {
+				if (inLevel(x, y)) {
+					aabbs += getBlockState(x, y).getAABB(Vec2I(x, y))
+				}
+			}
+		}
+		
+		return aabbs
 	}
 	
 	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * width]
@@ -134,7 +157,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 			tickBlockState(x, y)
 		}
 	}
-	
 	
 	fun tickBlockState(x: Int, y: Int) {
 		val blockState = getBlockState(x, y)

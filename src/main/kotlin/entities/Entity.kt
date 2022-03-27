@@ -1,22 +1,29 @@
 package entities
 
 import Game
+import app
 import blocks.Block
+import get
+import kotlinx.browser.window
 import level.Level
 import math.Direction
 import math.EPSILON
 import math.Vec2I
-import math.addY
 import math.div
 import math.times
 import pixi.externals.extensions.div
 import pixi.externals.extensions.inflate
 import pixi.externals.extensions.plus
+import pixi.externals.extensions.squaredLength
 import pixi.externals.extensions.toPoint
 import pixi.typings.core.Texture
+import pixi.typings.graphics.Graphics
+import pixi.typings.math.IPointData
 import pixi.typings.math.Point
+import pixi.typings.math_extras.intersects
 import pixi.typings.sprite.Sprite
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 abstract class Entity : Sprite() {
 	val canCollide = true
@@ -26,10 +33,26 @@ abstract class Entity : Sprite() {
 	var onGround = false
 	val velocity = Point()
 	private val maxVelocity = 10.0
+	private val graphics = Graphics().apply {
+		zIndex = 10000
+	}
 	
-	var blockPos get() = position.clone().addY(height / 4) / Block.SIZE
+	var blockPos
+		get() = position.clone() / Block.SIZE
 		set(value) {
-			position.copyFrom(value.toPoint() * Block.SIZE + Point(0.0, height / 4))
+			position.copyFrom(value.toPoint() * Block.SIZE)
+		}
+	
+	var blockPosX
+		get() = blockPos.x
+		set(value) {
+			blockPos = Point(value, blockPos.y)
+		}
+	
+	var blockPosY
+		get() = blockPos.y
+		set(value) {
+			blockPos = Point(blockPos.x, value)
 		}
 	
 	init {
@@ -37,40 +60,75 @@ abstract class Entity : Sprite() {
 		zIndex = 100
 	}
 	
-	fun canMove(level: Level) {
-		val entityRect = getAABB()
-		val entityRectTests = entityRect.inflate(0.5, 0.5)
-		val collided = booleanArrayOf(false, false)
+	fun handleCollisions(level: Level) {
+		val entityAABB = getAABB()
+		val entityAABBSearchBlocks = entityAABB.inflate(1.0, 2.0)
+		var onGround = false
+		var inHorizontalCollision = false
+		val nextAABB = entityAABB.clone().apply {
+			x += velocity.x / Block.SIZE
+			y += velocity.y / Block.SIZE
+		}
 		
-		for (blockX in entityRectTests.left.toInt()..entityRectTests.right.toInt()) {
-			for (blockY in entityRectTests.top.toInt()..entityRectTests.bottom.toInt()) {
+		if (window["debugCollisions"] == true && velocity.squaredLength > EPSILON) {
+			graphics.lineStyle(1.5, 0xFF00FF)
+			val bounds = getBounds().apply {
+				x += velocity.x
+				y += velocity.y
+			}
+			graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
+		}
+		
+		for (blockX in entityAABBSearchBlocks.left.roundToInt()..entityAABBSearchBlocks.right.roundToInt()) {
+			for (blockY in entityAABBSearchBlocks.top.roundToInt()..entityAABBSearchBlocks.bottom.roundToInt()) {
 				val block = level.getBlockStateOrNull(blockX, blockY) ?: continue
 				if (!block.block.collidable) continue
 				
-				val blockRect = block.getAABB(Vec2I(blockX, blockY))
+				graphics.lineStyle(1.0, 0xFF0000)
 				
-				if (abs(blockRect.top - entityRect.bottom) < 0.1 || (blockRect.top < entityRect.bottom && blockRect.bottom > entityRect.bottom)) {
+				val blockAABB = block.getAABB(Vec2I(blockX, blockY))
+				
+				if (blockAABB.intersects(nextAABB)) {
+					graphics.lineStyle(1.0, 0x00FF00)
+					
 					if (velocity.y > 0.0) {
-						onGround = true
-						velocity.y = 0.0
-						collided[1] = true
+						if (blockAABB.top < nextAABB.bottom && blockAABB.top > nextAABB.top) {
+							velocity.y = 0.0
+							onGround = true
+							graphics.lineStyle(1.0, 0xFFFF00)
+							graphics.drawRect(blockX * Block.SIZE.toDouble(), blockY * Block.SIZE.toDouble(), Block.SIZE.toDouble(), Block.SIZE.toDouble())
+						}
+					} else if (velocity.y < 0.0) {
+						if (blockAABB.bottom > nextAABB.top && blockAABB.bottom < nextAABB.bottom) {
+							velocity.y = 0.0
+						}
 					}
-				} else {
-					if (abs(blockRect.right - entityRect.left) < 0.1 && velocity.x < 0.0) {
-						inHorizontalCollision = true
-						velocity.x = 0.0
-						collided[0] = true
-					} else if (abs(blockRect.left - entityRect.right) < 0.1 && velocity.x > 0.0) {
-						inHorizontalCollision = true
-						velocity.x = 0.0
-						collided[0] = true
+					
+					if (abs(blockAABB.top - nextAABB.bottom) < 0.1) {
+						continue
 					}
+					
+					if (velocity.x > 0.0) {
+						if (blockAABB.left < nextAABB.right && blockAABB.left > nextAABB.left) {
+							velocity.x = 0.0
+							inHorizontalCollision = true
+						}
+					} else if (velocity.x < 0.0) {
+						if (blockAABB.right > nextAABB.left && blockAABB.right < nextAABB.right) {
+							velocity.x = 0.0
+							inHorizontalCollision = true
+						}
+					}
+				}
+				
+				if (window["debugCollisions"] == true) {
+					graphics.drawRect(blockX * Block.SIZE.toDouble(), blockY * Block.SIZE.toDouble(), Block.SIZE.toDouble(), Block.SIZE.toDouble())
 				}
 			}
 		}
 		
-		if (!collided[0]) inHorizontalCollision = false
-		if (!collided[1]) onGround = false
+		this.onGround = onGround
+		this.inHorizontalCollision = inHorizontalCollision
 	}
 	
 	fun getAABB() = getBounds().clone().apply { this / Block.SIZE.toDouble() }
@@ -88,14 +146,32 @@ abstract class Entity : Sprite() {
 		else velocity.x += direction.x * force * 0.4
 	}
 	
+	/*
 	fun move(x: Double, y: Double) {
-		velocity.x += x
-		velocity.y += y
+		var x2 = x
+		var y2 = y
+		
+		val aabb = getAABB().clone()
+		val blocks = Game.level.getAABBs(aabb.inflate(0.5, 0.5))
+		for (block in blocks) {
+			y2 = block.clipYCollide(aabb, y2)
+		}
+		aabb.y += y2
+
+		for (block in blocks) {
+			x2 = block.clipXCollide(aabb, x2)
+		}
+		console.log(x2, y2)
+		position.x += x2
+		
+		onGround = y != y2 && y < 0.0
+		if (x != x2) velocity.x = 0.0
+		if (y != y2) velocity.y = 0.0
+		
+//		setPosition(Point((aabb.x + aabb.x2) / 2, (aabb.y + aabb.y2)).times(Block.SIZE))
 	}
-	
-	fun setPosition(blockPos: Point) {
-		position.copyFrom(blockPos)
-	}
+	*/
+	fun setPosition(blockPos: IPointData) = position.copyFrom(blockPos)
 	
 	fun setPosition(blockPos: Vec2I) = position.copyFrom((blockPos * Block.SIZE).toPoint())
 	
@@ -106,19 +182,35 @@ abstract class Entity : Sprite() {
 	fun update() {
 		if (hasGravity) velocity.y += gravity
 		
-		if (velocity.x > maxVelocity) velocity.x = maxVelocity
-		if (velocity.x < -maxVelocity) velocity.x = -maxVelocity
-		
-		if (velocity.y > maxVelocity) velocity.y = maxVelocity
-		if (velocity.y < -maxVelocity) velocity.y = -maxVelocity
+		velocity.x = velocity.x.coerceIn(-maxVelocity..maxVelocity)
+		velocity.y = velocity.y.coerceIn(-maxVelocity..maxVelocity)
 		
 		if (abs(velocity.x) < EPSILON) velocity.x = 0.0
 		if (abs(velocity.y) < EPSILON) velocity.y = 0.0
 		
-		canMove(Game.level)
-		
-		position += velocity
+		if (window["debugCollisions"] == true) {
+			if (app.stage.children.none { it == graphics }) app.stage.addChild(graphics)
+			renderable = false
+			graphics.clear()
+			graphics.apply {
+				lineStyle(2.0, 0x0000FF)
+				drawRect(this@Entity.getBounds().x, this@Entity.getBounds().y, this@Entity.getBounds().width, this@Entity.getBounds().height)
+				lineStyle(1.0, 0x000000)
+				beginFill(0x00FF00)
+				drawCircle(this@Entity.position.x, this@Entity.position.y, 1.5)
+				endFill()
+			}
+		} else {
+			if (app.stage.children.any { it == graphics }) app.stage.removeChild(graphics)
+			renderable = true
+		}
 		
 		velocity.x *= if (onGround) 0.7 else 0.9
+		handleCollisions(Game.level)
+		
+		position += velocity
+
+//		move(velocity.x, velocity.y)
+	
 	}
 }

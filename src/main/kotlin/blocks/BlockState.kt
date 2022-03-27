@@ -1,9 +1,10 @@
 package blocks
 
 import level.Level
+import math.AABB
 import math.Direction
-import math.Rectangle
 import math.Vec2I
+import math.invoke
 import pixi.typings.math.Rectangle
 import pixi.typings.math_extras.intersects
 
@@ -31,9 +32,9 @@ data class BlockState(var block: Block) {
 		return true
 	}
 	
-	fun getNeighbor(level: Level, pos: Vec2I, dir: Direction) = level.getBlockStateOrNull(pos.x + dir.x, pos.y + dir.y)
+	fun getNeighbor(level: Level, pos: Vec2I, direction: Direction) = level.getBlockStateOrNull(pos.x + direction.x, pos.y + direction.y)
 	
-	fun getAABB(pos: Vec2I) = Rectangle(pos.x, pos.y, 1, 1)
+	fun getAABB(pos: Vec2I) = AABB(pos.x, pos.y, 1, 1)
 	
 	fun modifyBlock(level: Level, newBlock: Block) {
 		block = newBlock

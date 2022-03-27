@@ -2,6 +2,8 @@ package client
 
 import Game
 import app
+import get
+import kotlinx.browser.window
 import math.rounded
 import pixi.externals.extensions.hide
 import pixi.externals.extensions.setPositionFromWindow
@@ -30,7 +32,7 @@ object DebugGUI : Gui() {
 	}
 	
 	init {
-		hide()
+		if (window["debugCollisions"] != true) hide()
 	}
 	
 	fun update() {
