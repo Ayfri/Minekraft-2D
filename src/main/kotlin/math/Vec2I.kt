@@ -42,6 +42,14 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	fun distanceTo(other: Vec2I) = sqrt(((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y)).toDouble())
 	fun dot(other: Vec2I) = x * other.x + y * other.y
 	fun east() = addX(1)
+	fun copyFrom(other: Vec2I) = apply {
+		x = other.x
+		y = other.y
+	}
+	fun copyFrom(other: IPointData) = apply {
+		x = other.x.toInt()
+		y = other.y.toInt()
+	}
 	fun negate() = !this
 	fun reset() {
 		x = 0
@@ -64,3 +72,4 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	}
 }
 
+fun vec2i(block: Vec2I.() -> Unit) = Vec2I().apply(block)

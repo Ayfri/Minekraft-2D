@@ -1,6 +1,7 @@
 package level
 
 import Game
+import math.Vec2I
 
 class SaveFile {
 	var format = 0
@@ -8,6 +9,7 @@ class SaveFile {
 	var values: MutableList<SaveBlock> = mutableListOf()
 	var width: Int = 0
 	var height: Int = 0
+	var spawnPoint = Vec2I.ZERO
 }
 
 data class SaveBlock(var n: String = "")
@@ -26,5 +28,6 @@ fun Level.toSave(): String {
 	}
 	result.append("h:${json.height}")
 	result.append("w:${json.width}")
+	result.append("s:${json.spawnPoint.x},${json.spawnPoint.y}")
 	return result.toString()
 }

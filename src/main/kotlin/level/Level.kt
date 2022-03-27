@@ -5,6 +5,7 @@ import blocks.Block
 import blocks.BlockState
 import math.AABB
 import math.Vec2I
+import math.vec2i
 import math.x2
 import math.y2
 import pixi.externals.extensions.add
@@ -20,6 +21,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	var blocksPerTick = 100
 	val ticksTicker = Ticker()
 	val tilemap = CompositeTilemap()
+	var spawnPoint = Vec2I.ZERO
 	var updateRender = false
 	
 	init {
@@ -80,7 +82,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		}
 		return y - 1
 	}
-	
 	
 	fun getAABBs(rectangle: Rectangle): List<AABB> {
 		val aabbs = mutableListOf<AABB>()
@@ -145,6 +146,13 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		render()
 	}
 	
+	fun setRandomSpawnPoint() {
+		spawnPoint = vec2i {
+			x = Random.nextInt(width)
+			y = getTopPosition(x)
+		}
+	}
+	
 	fun render() {
 		if (!updateRender) return
 		tilemap.clear()
@@ -195,6 +203,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 			this.values = values.map { it.toJSON() }.toMutableList()
 			this@apply.height = this@Level.height
 			this@apply.width = this@Level.width
+			this.spawnPoint = this@Level.spawnPoint
 		}
 	}
 	

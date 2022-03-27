@@ -2,13 +2,18 @@ package level
 
 import blocks.Block
 import blocks.BlockState
+import math.Vec2I
+
+fun getFormat(save: String) = save.substring(save.indexOf("f:") + 2, save.indexOf("b:")).toIntOrNull() ?: -1
 
 fun loadLevel(save: String): Level {
-	val saveFile = SaveFile()
+	var saveFile = SaveFile()
 	var subString = ""
 	var value = ""
 	var inBlocks = false
 	var inValue = false
+	saveFile.format = getFormat(save)
+	
 	save.forEachIndexed { index, c ->
 		when (c) {
 			':' -> {
@@ -29,8 +34,6 @@ fun loadLevel(save: String): Level {
 				}
 			}
 			'b' -> {
-				value += subString
-				saveFile.format = value.toInt()
 				value = ""
 				subString = ""
 				inBlocks = true
@@ -64,13 +67,24 @@ fun loadLevel(save: String): Level {
 			'w' -> {
 				saveFile.height = subString.toInt()
 				subString = ""
+				value = ""
+				return@forEachIndexed
+			}
+			's' -> {
+				if (save[index + 1] == ':') {
+					saveFile.width = subString.toInt()
+					subString = ""
+					value = ""
+				}
 			}
 		}
 		
 		subString += c
 		
-		if (index == save.length - 1) saveFile.width = subString.toInt()
+		if (index == save.length - 1) saveFile.spawnPoint = save.substringAfterLast(":").split(",").take(2).let { Vec2I(it[0].toIntOrNull() ?: 0, it[1].toIntOrNull() ?: 0) }
 	}
+	
+	saveFile = patchSave(saveFile)
 	
 	return Level(saveFile.height, saveFile.width).apply {
 		var index = 0
@@ -81,7 +95,10 @@ fun loadLevel(save: String): Level {
 				index++
 			}
 		}
+		spawnPoint.copyFrom(saveFile.spawnPoint)
 		ticksTicker.start()
 		console.log("Loaded level")
+	}.let {
+		patchLevel(saveFile, it)
 	}
 }

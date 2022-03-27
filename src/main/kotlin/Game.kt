@@ -10,6 +10,7 @@ import kotlinx.js.jso
 import level.Level
 import level.LevelBlock
 import level.loadLevel
+import level.patchRawSave
 import level.toSave
 import math.Direction
 import math.Vec2I
@@ -33,7 +34,6 @@ import resources.GameProperties
 import resources.TextureManager
 import resources.parseGameProperties
 import typings.viewport.Viewport
-import kotlin.random.Random
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
@@ -52,6 +52,10 @@ object Game : EventEmitter() {
 			"left" to setOf("ArrowLeft", "q"),
 			"right" to setOf("ArrowRight", "d"),
 			"space" to setOf(" "),
+			"spawn" to setOf("r"),
+			"setspawn" to setOf("Enter"),
+			"save" to setOf("t"),
+			"load" to setOf("y"),
 		),
 		ignoreCase = true
 	)
@@ -127,15 +131,14 @@ object Game : EventEmitter() {
 		document.addEventListener("contextmenu", Event::preventDefault)
 		level = Level()
 		level.generateWorld()
+		level.setRandomSpawnPoint()
 		
 		uiViewport.addChild(DebugGUI)
 		uiViewport.addChild(InGameGUI)
 		window["debug"] = InGameGUI
 		
 		player = Player().apply {
-			val x = Random.nextInt(level.width)
-			val y = level.getTopPosition(x)
-			setPosition(Vec2I(x, y))
+			setPosition(level.spawnPoint)
 			worldViewport.addChild(this)
 		}
 		
@@ -158,15 +161,24 @@ object Game : EventEmitter() {
 			DebugGUI.visible = !DebugGUI.visible
 		}
 		
-		keyMap.keyboardManager.onPress("T") {
+		keyMap.onPress("save") {
 			window["save"] = level.toSave()
 		}
 		
-		keyMap.keyboardManager.onPress("Y") {
+		keyMap.onPress("load") {
 			level.destroy()
-			level = loadLevel(window["save"] as String)
+			val save = patchRawSave(window["save"] as String)
+			level = loadLevel(save)
 			level.updateRender = true
 			level.render()
+		}
+		
+		keyMap.onPress("spawn") {
+			player.setPosition(level.spawnPoint)
+		}
+		
+		keyMap.onPress("setspawn") {
+			level.spawnPoint = player.blockPos.toVec2I()
 		}
 	}
 	
