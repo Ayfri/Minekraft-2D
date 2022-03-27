@@ -24,6 +24,7 @@ dependencies {
     implementation("io.github.ayfri:PIXI-Kotlin:0.3.0")
     implementation(npm("@pixi/filter-outline", "4.1.5"))
     implementation(npm("@pixi/tilemap", "3.2.1"))
+    implementation(npm("pixi-viewport", "4.34.4"))
 }
 
 kotlin {

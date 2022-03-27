@@ -1,7 +1,6 @@
 package entities
 
 import Game
-import app
 import blocks.Block
 import get
 import kotlinx.browser.window
@@ -26,13 +25,15 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 abstract class Entity : Sprite() {
-	val canCollide = true
-	val hasGravity = true
-	val gravity = 0.25
+	open var canCollide = true
+	open var hasGravity = true
+	open var gravity = 0.25
 	var inHorizontalCollision = false
+		protected set
 	var onGround = false
-	val velocity = Point()
-	private val maxVelocity = 10.0
+		protected set
+	open val velocity = Point()
+	private var maxVelocity = 10.0
 	private val graphics = Graphics().apply {
 		zIndex = 10000
 	}
@@ -72,9 +73,9 @@ abstract class Entity : Sprite() {
 		
 		if (window["debugCollisions"] == true && velocity.squaredLength > EPSILON) {
 			graphics.lineStyle(1.5, 0xFF00FF)
-			val bounds = getBounds().apply {
-				x += velocity.x
-				y += velocity.y
+			val bounds = getLocalBounds().apply {
+				x += velocity.x + position.x
+				y += velocity.y + position.y
 			}
 			graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
 		}
@@ -131,9 +132,13 @@ abstract class Entity : Sprite() {
 		this.inHorizontalCollision = inHorizontalCollision
 	}
 	
-	fun getAABB() = getBounds().clone().apply { this / Block.SIZE.toDouble() }
+	open fun getAABB() = getLocalBounds().clone().apply {
+		x += position.x
+		y += position.y
+		this / Block.SIZE.toDouble()
+	}
 	
-	fun jump(force: Double = 3.5) {
+	open fun jump(force: Double = 3.5) {
 		if (onGround) {
 			velocity.y = -force
 			position.y -= 1.0
@@ -154,7 +159,7 @@ abstract class Entity : Sprite() {
 		texture = Texture.from("textures/$name.png")
 	}
 	
-	fun update() {
+	open fun update() {
 		if (hasGravity) velocity.y += gravity
 		
 		velocity.x = velocity.x.coerceIn(-maxVelocity..maxVelocity)
@@ -164,19 +169,23 @@ abstract class Entity : Sprite() {
 		if (abs(velocity.y) < EPSILON) velocity.y = 0.0
 		
 		if (window["debugCollisions"] == true) {
-			if (app.stage.children.none { it == graphics }) app.stage.addChild(graphics)
+			if (Game.worldViewport.children.none { it == graphics }) Game.worldViewport.addChild(graphics)
 			renderable = false
 			graphics.clear()
 			graphics.apply {
 				lineStyle(2.0, 0x0000FF)
-				drawRect(this@Entity.getBounds().x, this@Entity.getBounds().y, this@Entity.getBounds().width, this@Entity.getBounds().height)
+				val bounds = this@Entity.getLocalBounds().apply {
+					this.x += this@Entity.position.x
+					this.y += this@Entity.position.y
+				}
+				drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
 				lineStyle(1.0, 0x000000)
 				beginFill(0x00FF00)
 				drawCircle(this@Entity.position.x, this@Entity.position.y, 1.5)
 				endFill()
 			}
 		} else {
-			if (app.stage.children.any { it == graphics }) app.stage.removeChild(graphics)
+			if (Game.worldViewport.children.any { it == graphics }) Game.worldViewport.removeChild(graphics)
 			renderable = true
 		}
 		

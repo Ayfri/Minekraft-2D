@@ -6,6 +6,7 @@ import client.InGameGUI
 import entities.Player
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.js.jso
 import level.Level
 import level.LevelBlock
 import level.loadLevel
@@ -20,6 +21,7 @@ import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
+import pixi.typings.math.IPointData
 import pixi.typings.sprite.Sprite
 import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
@@ -30,6 +32,7 @@ import pixi.utils.MouseManager
 import resources.GameProperties
 import resources.TextureManager
 import resources.parseGameProperties
+import typings.viewport.Viewport
 import kotlin.random.Random
 
 object Game : EventEmitter() {
@@ -58,6 +61,18 @@ object Game : EventEmitter() {
 			InGameGUI.selectedBlockSprite.texture = blockTextures[value.name]!!
 			field = value
 		}
+	
+	val uiViewport = Viewport(jso {
+		screenWidth = window.innerWidth.toDouble()
+		screenHeight = window.innerHeight.toDouble()
+	})
+	val worldViewport = Viewport(jso {
+		screenWidth = window.innerWidth.toDouble()
+		screenHeight = window.innerHeight.toDouble()
+		
+		worldWidth = Level.WIDTH * Block.SIZE.toDouble()
+		worldHeight = Level.HEIGHT * Block.SIZE.toDouble()
+	})
 	
 	lateinit var background: Sprite
 	lateinit var gameProperties: GameProperties
@@ -98,11 +113,13 @@ object Game : EventEmitter() {
 		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
 		window["app"] = app
 		background.apply {
-			addToApplication(app)
+			uiViewport.addChild(this)
 			width = app.screen.width
 			height = app.screen.height
 			zIndex = -1
 		}
+		uiViewport.addToApplication(app)
+		worldViewport.addToApplication(app)
 		loadGameProperties()
 	}
 	
@@ -111,16 +128,15 @@ object Game : EventEmitter() {
 		level = Level()
 		level.generateWorld()
 		
-		InGameGUI.addToApplication(app)
-		DebugGUI.addToApplication(app)
+		uiViewport.addChild(DebugGUI)
+		uiViewport.addChild(InGameGUI)
 		window["debug"] = InGameGUI
 		
 		player = Player().apply {
 			val x = Random.nextInt(level.width)
 			val y = level.getTopPosition(x)
-			console.log(y)
 			setPosition(Vec2I(x, y))
-			addToApplication(app)
+			worldViewport.addChild(this)
 		}
 		
 		keyMap.onPress("1") { placingBlock = Block.STONE }
@@ -160,7 +176,7 @@ object Game : EventEmitter() {
 		InGameGUI.update()
 		app.stage.sortChildren()
 		
-		val blockPos = (mouseManager.position.toVec2I()) / Block.SIZE
+		val blockPos = worldViewport.toWorld<IPointData>(mouseManager.position).toVec2I() / Block.SIZE
 		if (!level.inLevel(blockPos)) return
 		hoverBlock = LevelBlock(level.getBlockState(blockPos).block, blockPos)
 		

@@ -1,7 +1,6 @@
 package level
 
 import Game
-import app
 import blocks.Block
 import blocks.BlockState
 import math.AABB
@@ -9,7 +8,6 @@ import math.Vec2I
 import math.x2
 import math.y2
 import pixi.externals.extensions.add
-import pixi.externals.extensions.addToApplication
 import pixi.typings.math.Rectangle
 import pixi.typings.ticker.Ticker
 import typings.tilemap.CompositeTilemap
@@ -26,7 +24,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	init {
 		tilemap.zIndex = 10
-		tilemap.addToApplication(app)
+		Game.worldViewport.addChild(tilemap)
 		ticksTicker.add { tick() }
 		ticksTicker.maxFPS = 20
 	}

@@ -41,7 +41,7 @@ object InGameGUI : Gui() {
 		it.lineStyle(1.0)
 		it.drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
 		zIndex = 1000
-		addChild(it)
+		Game.worldViewport.addChild(it)
 	}
 	
 	fun update() {
