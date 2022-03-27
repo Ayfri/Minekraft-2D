@@ -174,7 +174,8 @@ object Game : EventEmitter() {
 			val save = patchRawSave(window["save"] as String)
 			level = loadLevel(save)
 			level.updateRender = true
-			level.render()
+			level.chunks.forEach { it.updateRender = true }
+			level.renderAll()
 		}
 		
 		keyMap.onPress("spawn") {

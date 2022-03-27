@@ -6,7 +6,6 @@ import math.Direction
 import math.Vec2I
 import math.invoke
 import pixi.typings.math.Rectangle
-import pixi.typings.math_extras.intersects
 
 data class BlockState(var block: Block) {
 	var neighbors: List<BlockState?> = List(4) { null }
@@ -36,9 +35,9 @@ data class BlockState(var block: Block) {
 	
 	fun getAABB(pos: Vec2I) = AABB(pos.x, pos.y, 1, 1)
 	
-	fun modifyBlock(level: Level, newBlock: Block) {
+	fun modifyBlock(level: Level, x: Int, y: Int, newBlock: Block) {
 		block = newBlock
-		level.render()
+		level.renderChunkAt(x, y)
 	}
 	
 	fun shouldCollide(other: Rectangle, pos: Vec2I) = getAABB(pos).intersects(other)

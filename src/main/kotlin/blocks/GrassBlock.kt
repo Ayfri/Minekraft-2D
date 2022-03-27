@@ -14,7 +14,7 @@ open class GrassBlock : Block("grass") {
 				val level = it[2].unsafeCast<Level>()
 				
 				if ((blockState.getNeighbor(level, pos, Direction.UP) ?: return@on).block.blocksLight) {
-					blockState.modifyBlock(level, DIRT)
+					blockState.modifyBlock(level, pos.x, pos.y, DIRT)
 				}
 			}
 		}

@@ -11,29 +11,27 @@ import math.y2
 import pixi.externals.extensions.add
 import pixi.typings.math.Rectangle
 import pixi.typings.ticker.Ticker
-import typings.tilemap.CompositeTilemap
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
 class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	val blockStates = MutableList(height * width) { BlockState.AIR }
-	var blocksPerTick = 100
 	val ticksTicker = Ticker()
-	val tilemap = CompositeTilemap()
 	var spawnPoint = Vec2I.ZERO
 	var updateRender = false
+	val chunks = List((height / Chunk.SIZE) * (width / Chunk.SIZE)) {
+		Chunk(this, Vec2I(it % (width / Chunk.SIZE), it / (width / Chunk.SIZE)))
+	}
 	
 	init {
-		tilemap.zIndex = 10
-		Game.worldViewport.addChild(tilemap)
 		ticksTicker.add { tick() }
 		ticksTicker.maxFPS = 20
 	}
 	
 	fun destroy() {
 		ticksTicker.destroy()
-		tilemap.destroy(false)
+		chunks.forEach(Chunk::destroy)
 	}
 	
 	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until width && blockPos.y in 0 until height
@@ -71,16 +69,9 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		
 		console.log("Level generated")
 		updateRender = true
+		chunks.forEach { it.updateRender = true }
 		ticksTicker.start()
-		render()
-	}
-	
-	fun getTopPosition(x: Int): Int {
-		var y = 0
-		while (y < height && !getBlockState(x, y).block.visible) {
-			y++
-		}
-		return y - 1
+		renderAll()
 	}
 	
 	fun getAABBs(rectangle: Rectangle): List<AABB> {
@@ -102,11 +93,36 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		return aabbs
 	}
 	
+	fun getBlocks(chunk: Chunk) = blockStates.slice(chunk.position.x * Chunk.SIZE * width..chunk.position.x * Chunk.SIZE * width + Chunk.SIZE * width)
+	
+	fun getChunk(blockPos: Vec2I): Chunk? {
+		val chunkX = blockPos.x / Chunk.SIZE
+		val chunkY = blockPos.y / Chunk.SIZE
+		return getChunkAt(chunkX, chunkY)
+	}
+	fun getChunk(blockX: Int, blockY: Int): Chunk? {
+		val chunkX = blockX / Chunk.SIZE
+		val chunkY = blockY / Chunk.SIZE
+		return getChunkAt(chunkX, chunkY)
+	}
+	
+	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.position.x == x && it.position.y == y }
+	fun getChunkAt(position: Vec2I) = chunks.firstOrNull { it.position == position }
+	
+	
 	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * width]
-	inline fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
+	fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
 	
 	fun getBlockStateOrNull(blockPos: Vec2I) = if (inLevel(blockPos)) getBlockState(blockPos) else null
 	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
+	
+	fun getTopPosition(x: Int): Int {
+		var y = 0
+		while (y < height && !getBlockState(x, y).block.visible) {
+			y++
+		}
+		return y - 1
+	}
 	
 	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
 	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
@@ -119,22 +135,24 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		
 		updateRender = false
 		
-		for (y in blockPos.y - treeHeight..blockPos.y - leavesGroundHeight) {
-			for (x in blockPos.x - 1..blockPos.x + 1) {
-				setBlockState(x, y, leaves)
+		kotlin.runCatching {
+			for (y in blockPos.y - treeHeight..blockPos.y - leavesGroundHeight) {
+				for (x in blockPos.x - 1..blockPos.x + 1) {
+					setBlockState(x, y, leaves)
+				}
 			}
-		}
-		
-		for (y in blockPos.y - treeHeight + 1 until blockPos.y - leavesGroundHeight) {
-			setBlockState(blockPos.x - 2, y, leaves)
-		}
-		
-		for (y in blockPos.y - treeHeight + 1 until blockPos.y - leavesGroundHeight) {
-			setBlockState(blockPos.x + 2, y, leaves)
-		}
-		
-		for (y in blockPos.y - treeHeight + 2..blockPos.y) {
-			setBlockState(blockPos.x, y, trunk)
+			
+			for (y in blockPos.y - treeHeight + 1 until blockPos.y - leavesGroundHeight) {
+				setBlockState(blockPos.x - 2, y, leaves)
+			}
+			
+			for (y in blockPos.y - treeHeight + 1 until blockPos.y - leavesGroundHeight) {
+				setBlockState(blockPos.x + 2, y, leaves)
+			}
+			
+			for (y in blockPos.y - treeHeight + 2..blockPos.y) {
+				setBlockState(blockPos.x, y, trunk)
+			}
 		}
 		
 		updateRender = true
@@ -143,7 +161,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
 		blockStates[x + y * width] = blockState
-		render()
+		renderChunkAt(x, y)
 	}
 	
 	fun setRandomSpawnPoint() {
@@ -153,24 +171,18 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		}
 	}
 	
-	fun render() {
-		if (!updateRender) return
-		tilemap.clear()
-		for (x in 0 until width) {
-			for (y in 0 until height) {
-				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: return, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble())
-			}
-		}
+	fun renderChunkAt(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
+	fun renderChunkAt(blockPos: Vec2I) = getChunk(blockPos)?.render()
+	fun renderChunk(chunkPos: Vec2I) = getChunkAt(chunkPos)?.render()
+	
+	fun renderAll() {
+		chunks.forEach(Chunk::render)
 	}
 	
 	fun setBlockState(position: Vec2I, blockState: BlockState) = setBlockState(position.x, position.y, blockState)
 	
 	fun tick() {
-		for (i in 0..blocksPerTick) {
-			val x = Random.nextInt(width)
-			val y = Random.nextInt(height)
-			tickBlockState(x, y)
-		}
+		chunks.forEach(Chunk::tick)
 	}
 	
 	fun tickBlockState(x: Int, y: Int) {
@@ -213,7 +225,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	companion object {
-		const val WIDTH = 128
-		const val HEIGHT = 64
+		const val HEIGHT = 128
+		const val WIDTH = 1024
 	}
 }
