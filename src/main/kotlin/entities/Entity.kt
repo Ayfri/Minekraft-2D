@@ -11,7 +11,7 @@ import math.Vec2I
 import math.div
 import math.times
 import pixi.externals.extensions.div
-import pixi.externals.extensions.inflate
+import pixi.externals.extensions.move
 import pixi.externals.extensions.plus
 import pixi.externals.extensions.squaredLength
 import pixi.externals.extensions.toPoint
@@ -19,7 +19,6 @@ import pixi.typings.core.Texture
 import pixi.typings.graphics.Graphics
 import pixi.typings.math.IPointData
 import pixi.typings.math.Point
-import pixi.typings.math_extras.intersects
 import pixi.typings.sprite.Sprite
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -63,7 +62,7 @@ abstract class Entity : Sprite() {
 	
 	fun handleCollisions(level: Level) {
 		val entityAABB = getAABB()
-		val entityAABBSearchBlocks = entityAABB.inflate(1.0, 2.0)
+		val entityAABBSearchBlocks = entityAABB.clone().pad(1.0, 2.0)
 		var onGround = false
 		var inHorizontalCollision = false
 		val nextAABB = entityAABB.clone().apply {
@@ -73,10 +72,7 @@ abstract class Entity : Sprite() {
 		
 		if (window["debugCollisions"] == true && velocity.squaredLength > EPSILON) {
 			graphics.lineStyle(1.5, 0xFF00FF)
-			val bounds = getLocalBounds().apply {
-				x += velocity.x + position.x
-				y += velocity.y + position.y
-			}
+			val bounds = getLocalBounds().move(x + velocity.x, y + velocity.y)
 			graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
 		}
 		
@@ -132,9 +128,7 @@ abstract class Entity : Sprite() {
 		this.inHorizontalCollision = inHorizontalCollision
 	}
 	
-	open fun getAABB() = getLocalBounds().clone().apply {
-		x += position.x
-		y += position.y
+	open fun getAABB() = getLocalBounds().clone().move(x, y).apply {
 		this / Block.SIZE.toDouble()
 	}
 	
@@ -174,10 +168,7 @@ abstract class Entity : Sprite() {
 			graphics.clear()
 			graphics.apply {
 				lineStyle(2.0, 0x0000FF)
-				val bounds = this@Entity.getLocalBounds().apply {
-					this.x += this@Entity.position.x
-					this.y += this@Entity.position.y
-				}
+				val bounds = this@Entity.getLocalBounds().move(this@Entity.x, this@Entity.y)
 				drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
 				lineStyle(1.0, 0x000000)
 				beginFill(0x00FF00)
