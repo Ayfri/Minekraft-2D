@@ -12,6 +12,5 @@ fun main() {
 	require("@pixi/math-extras")
 	settings.SCALE_MODE = SCALE_MODES.NEAREST
 	window["game"] = Game
-	window["debugCollisions"] = true
 	window.onload = { Game.emit("preInit") }
 }

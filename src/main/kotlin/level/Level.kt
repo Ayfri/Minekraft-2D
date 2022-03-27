@@ -75,6 +75,15 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		render()
 	}
 	
+	fun getTopPosition(x: Int): Int {
+		var y = 0
+		while (y < height && !getBlockState(x, y).block.visible) {
+			y++
+		}
+		return y - 1
+	}
+	
+	
 	fun getAABBs(rectangle: Rectangle): List<AABB> {
 		val aabbs = mutableListOf<AABB>()
 		

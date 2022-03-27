@@ -146,31 +146,6 @@ abstract class Entity : Sprite() {
 		else velocity.x += direction.x * force * 0.4
 	}
 	
-	/*
-	fun move(x: Double, y: Double) {
-		var x2 = x
-		var y2 = y
-		
-		val aabb = getAABB().clone()
-		val blocks = Game.level.getAABBs(aabb.inflate(0.5, 0.5))
-		for (block in blocks) {
-			y2 = block.clipYCollide(aabb, y2)
-		}
-		aabb.y += y2
-
-		for (block in blocks) {
-			x2 = block.clipXCollide(aabb, x2)
-		}
-		console.log(x2, y2)
-		position.x += x2
-		
-		onGround = y != y2 && y < 0.0
-		if (x != x2) velocity.x = 0.0
-		if (y != y2) velocity.y = 0.0
-		
-//		setPosition(Point((aabb.x + aabb.x2) / 2, (aabb.y + aabb.y2)).times(Block.SIZE))
-	}
-	*/
 	fun setPosition(blockPos: IPointData) = position.copyFrom(blockPos)
 	
 	fun setPosition(blockPos: Vec2I) = position.copyFrom((blockPos * Block.SIZE).toPoint())
@@ -209,8 +184,5 @@ abstract class Entity : Sprite() {
 		handleCollisions(Game.level)
 		
 		position += velocity
-
-//		move(velocity.x, velocity.y)
-	
 	}
 }

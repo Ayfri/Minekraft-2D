@@ -30,6 +30,7 @@ import pixi.utils.MouseManager
 import resources.GameProperties
 import resources.TextureManager
 import resources.parseGameProperties
+import kotlin.random.Random
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
@@ -115,7 +116,10 @@ object Game : EventEmitter() {
 		window["debug"] = InGameGUI
 		
 		player = Player().apply {
-			setPosition(Vec2I(level.width / 2, level.height / 2))
+			val x = Random.nextInt(level.width)
+			val y = level.getTopPosition(x)
+			console.log(y)
+			setPosition(Vec2I(x, y))
 			addToApplication(app)
 		}
 		
