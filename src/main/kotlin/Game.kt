@@ -69,14 +69,18 @@ object Game : EventEmitter() {
 	val uiViewport = Viewport(jso {
 		screenWidth = window.innerWidth.toDouble()
 		screenHeight = window.innerHeight.toDouble()
-	})
+	}).apply {
+		zIndex = 500
+	}
 	val worldViewport = Viewport(jso {
 		screenWidth = window.innerWidth.toDouble()
 		screenHeight = window.innerHeight.toDouble()
 		
 		worldWidth = Level.WIDTH * Block.SIZE.toDouble()
 		worldHeight = Level.HEIGHT * Block.SIZE.toDouble()
-	})
+	}).apply {
+		zIndex = 0
+	}
 	
 	lateinit var background: Sprite
 	lateinit var gameProperties: GameProperties
@@ -117,10 +121,10 @@ object Game : EventEmitter() {
 		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
 		window["app"] = app
 		background.apply {
-			uiViewport.addChild(this)
+			addToApplication(app)
 			width = app.screen.width
 			height = app.screen.height
-			zIndex = -1
+			zIndex = -1000
 		}
 		uiViewport.addToApplication(app)
 		worldViewport.addToApplication(app)
