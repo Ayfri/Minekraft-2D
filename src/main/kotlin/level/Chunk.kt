@@ -2,6 +2,7 @@ package level
 
 import Game
 import blocks.Block
+import kotlinx.js.jso
 import math.Vec2I
 import math.times
 import pixi.externals.extensions.collidesWith
@@ -53,7 +54,10 @@ class Chunk(val level: Level, val position: Vec2I) {
 		
 		for (x in 0 until SIZE) {
 			for (y in 0 until SIZE) {
-				tilemap.tile(Game.blockTextures[getBlock(x, y).block.name] ?: return, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble())
+				tilemap.tile(Game.blockTextures[getBlock(x, y).block.name] ?: return, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
+					tileHeight = Block.SIZE
+					tileWidth = Block.SIZE
+				})
 			}
 		}
 	}

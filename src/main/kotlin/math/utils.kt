@@ -10,4 +10,4 @@ fun Double.rounded(decimals: Int): Double {
 	return round(this * multiplier) / multiplier
 }
 
-fun randomBoolean(length : Int)  = (0..length).random() == 0
+fun randomBoolean(length : Int = 1)  = (0..length).random() == 0

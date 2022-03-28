@@ -45,7 +45,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 			val noise = (1 + PerlinNoise.noise(((x + 0.1) / width) + seed, x.toDouble() / height)) / 1.5
 			val result = preciseNoise * noise
 			
-			val grassLayer = (result * height + 20).roundToInt()
+			val grassLayer = (result * height + height / 4).roundToInt()
 			surfaceLayers.add(grassLayer)
 			
 			for (y in grassLayer.coerceAtLeast(0) until height) {
@@ -225,7 +225,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	companion object {
-		const val HEIGHT = 128
-		const val WIDTH = 1024
+		const val HEIGHT = Chunk.SIZE * 8
+		const val WIDTH = Chunk.SIZE * 32
 	}
 }

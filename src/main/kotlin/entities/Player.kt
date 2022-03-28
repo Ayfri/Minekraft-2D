@@ -1,6 +1,7 @@
 package entities
 
 import Game
+import kotlinx.js.jso
 
 @Suppress("JS_FAKE_NAME_CLASH")
 class Player : Entity() {
@@ -12,7 +13,11 @@ class Player : Entity() {
 	}
 	
 	fun centerCamera() {
-		Game.worldViewport.follow(this)
+		Game.worldViewport.follow(this, jso {
+			speed = 16.0
+			acceleration = 0.1
+			radius = 12.0
+		})
 	}
 	
 	override fun update() {

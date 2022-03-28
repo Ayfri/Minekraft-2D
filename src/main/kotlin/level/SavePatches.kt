@@ -8,8 +8,6 @@ fun patchRawSave(save: String)  = when(getFormat(save)) {
 fun patchSave(save: SaveFile) = save
 
 fun patchLevel(save: SaveFile, level: Level) = when(save.format) {
-	1 -> {
-		level.apply(Level::setRandomSpawnPoint)
-	}
+	1 -> level.apply(Level::setRandomSpawnPoint)
 	else -> level
 }

@@ -1,6 +1,7 @@
 package resources
 import Game
 import kotlinext.js.getOwnPropertyNames
+import pixi.typings.constants.SCALE_MODES
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
 import pixi.typings.loaders.Loader
@@ -35,7 +36,9 @@ object TextureManager : EventEmitter() {
 			textures.filterNot { it.value == null }.forEach {
 				TextureManager.textures[it.key] = it.value!!
 				if (it.key.startsWith("block.")) {
-					Game.blockTextures[it.key.removePrefix("block.")] = it.value.unsafeCast<Texture<Resource>>()
+					Game.blockTextures[it.key.removePrefix("block.")] = it.value.unsafeCast<Texture<Resource>>().apply {
+						baseTexture.scaleMode = SCALE_MODES.NEAREST
+					}
 				}
 			}
 			

@@ -22,6 +22,7 @@ import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
+import pixi.typings.interaction.InteractionManager
 import pixi.typings.math.IPointData
 import pixi.typings.sprite.Sprite
 import pixi.typings.ticker.UPDATE_PRIORITY
@@ -72,20 +73,12 @@ object Game : EventEmitter() {
 	}).apply {
 		zIndex = 500
 	}
-	val worldViewport = Viewport(jso {
-		screenWidth = window.innerWidth.toDouble()
-		screenHeight = window.innerHeight.toDouble()
-		
-		worldWidth = Level.WIDTH * Block.SIZE.toDouble()
-		worldHeight = Level.HEIGHT * Block.SIZE.toDouble()
-	}).apply {
-		zIndex = 0
-	}
 	
 	lateinit var background: Sprite
 	lateinit var gameProperties: GameProperties
 	lateinit var level: Level
 	lateinit var player: Player
+	lateinit var worldViewport: Viewport
 	
 	init {
 		on("preInit") { preInit() }
@@ -120,11 +113,27 @@ object Game : EventEmitter() {
 		app.addToBody()
 		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
 		window["app"] = app
+		
 		background.apply {
 			addToApplication(app)
 			width = app.screen.width
 			height = app.screen.height
 			zIndex = -1000
+		}
+		
+		worldViewport = Viewport(jso {
+			screenWidth = window.innerWidth.toDouble()
+			screenHeight = window.innerHeight.toDouble()
+			interaction = app.renderer.plugins.asDynamic().interaction as InteractionManager
+			
+			worldWidth = Level.WIDTH * Block.SIZE.toDouble()
+			worldHeight = Level.HEIGHT * Block.SIZE.toDouble()
+		}).apply {
+			wheel(jso {
+				keyToPress = arrayOf("AltLeft")
+				smooth = true
+			})
+			zIndex = 0
 		}
 		uiViewport.addToApplication(app)
 		worldViewport.addToApplication(app)
@@ -144,6 +153,7 @@ object Game : EventEmitter() {
 		player = Player().apply {
 			setPosition(level.spawnPoint)
 			worldViewport.addChild(this)
+			worldViewport.moveCenter(position)
 		}
 		
 		keyMap.onPress("1") { placingBlock = Block.STONE }
