@@ -37,7 +37,7 @@ data class BlockState(var block: Block) {
 	
 	fun modifyBlock(level: Level, x: Int, y: Int, newBlock: Block) {
 		block = newBlock
-		level.renderChunkAt(x, y)
+		level.renderChunkAtBlock(x, y)
 	}
 	
 	fun shouldCollide(other: Rectangle, pos: Vec2I) = getAABB(pos).intersects(other)

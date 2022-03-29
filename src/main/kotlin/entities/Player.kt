@@ -2,6 +2,7 @@ package entities
 
 import Game
 import kotlinx.js.jso
+import pixi.externals.extensions.distanceTo
 
 @Suppress("JS_FAKE_NAME_CLASH")
 class Player : Entity() {
@@ -14,9 +15,14 @@ class Player : Entity() {
 	
 	fun centerCamera() {
 		Game.worldViewport.follow(this, jso {
-			speed = 16.0
-			acceleration = 0.1
-			radius = 12.0
+			val screenWidth = Game.worldViewport.worldScreenWidth
+			val playerDistanceFromCenter = Game.worldViewport.center.distanceTo(this@Player.position)
+			val playerDistanceRatio = playerDistanceFromCenter / screenWidth
+			
+//			console.log("playerDistanceRatio: $playerDistanceRatio", "playerDistanceFromCenter: $playerDistanceFromCenter", "screenWidth: $screenWidth")
+			speed = screenWidth / 25
+			acceleration = playerDistanceRatio.coerceAtLeast(0.02)
+			radius = screenWidth / 30
 		})
 	}
 	

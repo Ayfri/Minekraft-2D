@@ -7,6 +7,7 @@ import math.Vec2I
 import math.times
 import pixi.externals.extensions.collidesWith
 import pixi.externals.extensions.div
+import pixi.externals.extensions.plus
 import pixi.externals.extensions.rangeTo
 import typings.tilemap.CompositeTilemap
 import kotlin.random.Random
@@ -22,6 +23,7 @@ class Chunk(val level: Level, val position: Vec2I) {
 	init {
 		tilemap.zIndex = 10
 		tilemap.position.copyFrom(position.toPoint() * SIZE * Block.SIZE)
+		tilemap.cullable = true
 		Game.worldViewport.addChild(tilemap)
 	}
 	
@@ -29,15 +31,17 @@ class Chunk(val level: Level, val position: Vec2I) {
 		tilemap.destroy(false)
 	}
 	
+	fun getAABB() = position.toPoint().times(SIZE * Block.SIZE)..position.toPoint().times(SIZE * Block.SIZE).plus(SIZE * Block.SIZE)
+	
 	fun getBlock(localPosition: Vec2I) = level.getBlockState(position * SIZE + localPosition)
 	fun getBlock(localX: Int, localY: Int) = level.getBlockState(x * SIZE + localX, y * SIZE + localY)
 	
 	fun getBlockStates() = level.getBlocks(this)
 	
 	fun isVisible(): Boolean {
-		val viewport = Game.worldViewport.getBounds().clone()
+		val viewport = Game.worldViewport.getVisibleBounds().clone()
 		viewport / Block.SIZE
-		return viewport.collidesWith(position.toPoint() * SIZE * Block.SIZE..(position + SIZE).toPoint() * Block.SIZE)
+		return viewport collidesWith getAABB()
 	}
 	
 	fun tick() {

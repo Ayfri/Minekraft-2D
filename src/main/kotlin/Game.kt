@@ -130,8 +130,9 @@ object Game : EventEmitter() {
 			worldHeight = Level.HEIGHT * Block.SIZE.toDouble()
 		}).apply {
 			wheel(jso {
-				keyToPress = arrayOf("AltLeft")
-				smooth = true
+				keyToPress = arrayOf("ShiftLeft")
+				smooth = 4
+				percent = 0.1
 			})
 			zIndex = 0
 		}

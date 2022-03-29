@@ -161,7 +161,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
 		blockStates[x + y * width] = blockState
-		renderChunkAt(x, y)
+		renderChunkAtBlock(x, y)
 	}
 	
 	fun setRandomSpawnPoint() {
@@ -171,9 +171,9 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		}
 	}
 	
-	fun renderChunkAt(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
-	fun renderChunkAt(blockPos: Vec2I) = getChunk(blockPos)?.render()
-	fun renderChunk(chunkPos: Vec2I) = getChunkAt(chunkPos)?.render()
+	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
+	fun renderChunkAtBlock(blockPos: Vec2I) = getChunk(blockPos)?.render()
+	fun renderChunkAt(chunkPos: Vec2I) = getChunkAt(chunkPos)?.render()
 	
 	fun renderAll() {
 		chunks.forEach(Chunk::render)
@@ -225,7 +225,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	companion object {
-		const val HEIGHT = Chunk.SIZE * 8
+		const val HEIGHT = Chunk.SIZE * 12
 		const val WIDTH = Chunk.SIZE * 32
 	}
 }
