@@ -16,6 +16,8 @@ import math.Direction
 import math.Vec2I
 import math.toVec2I
 import org.w3c.dom.events.Event
+import org.w3c.dom.get
+import org.w3c.dom.set
 import pixi.externals.Color
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
@@ -177,12 +179,14 @@ object Game : EventEmitter() {
 		}
 		
 		keyMap.onPress("save") {
-			window["save"] = level.toSave()
+			window.localStorage["level"] = level.toSave()
 		}
 		
 		keyMap.onPress("load") {
+			if (window.localStorage["level"] == null) return@onPress;
+			
 			level.destroy()
-			val save = patchRawSave(window["save"] as String)
+			val save = patchRawSave(window.localStorage["level"]!!)
 			level = loadLevel(save)
 			level.updateRender = true
 			level.chunks.forEach { it.updateRender = true }
