@@ -14,17 +14,19 @@ import kotlin.random.Random
 
 class Chunk(val level: Level, val position: Vec2I) {
 	val blockUpdatesPerTick = 3
-	val tilemap = CompositeTilemap()
+	val tilemap = CompositeTilemap().also {
+		it.zIndex = 10
+		it.position.copyFrom(position.toPoint() * SIZE * Block.SIZE)
+		it.cullable = true
+		Game.worldViewport.addChild(it)
+	}
 	var updateRender = false
 	
 	val x get() = position.x
 	val y get() = position.y
 	
 	init {
-		tilemap.zIndex = 10
-		tilemap.position.copyFrom(position.toPoint() * SIZE * Block.SIZE)
-		tilemap.cullable = true
-		Game.worldViewport.addChild(tilemap)
+	
 	}
 	
 	fun destroy() {

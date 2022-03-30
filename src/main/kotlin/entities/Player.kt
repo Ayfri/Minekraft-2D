@@ -10,16 +10,16 @@ class Player : Entity() {
 		setTexture("player")
 		width = 15.0
 		height = 28.0
-		zIndex = 150
+		zIndex = 200
 	}
 	
 	fun centerCamera() {
+		if (destroyed) return
 		Game.worldViewport.follow(this, jso {
 			val screenWidth = Game.worldViewport.worldScreenWidth
 			val playerDistanceFromCenter = Game.worldViewport.center.distanceTo(this@Player.position)
 			val playerDistanceRatio = playerDistanceFromCenter / screenWidth
 			
-//			console.log("playerDistanceRatio: $playerDistanceRatio", "playerDistanceFromCenter: $playerDistanceFromCenter", "screenWidth: $screenWidth")
 			speed = screenWidth / 25
 			acceleration = playerDistanceRatio.coerceAtLeast(0.02)
 			radius = screenWidth / 30

@@ -45,17 +45,17 @@ object DebugGUI : Gui() {
 		""".trimIndent()
 		
 		playerText.text = """
-			inHorizontalCollision = ${Game.player.inHorizontalCollision}
-			onGround = ${Game.player.onGround}
-			x = ${Game.player.x}
-			y = ${Game.player.y}
-			blockX = ${Game.player.blockPos.x}
-			blockY = ${Game.player.blockPos.y}
-			velocityX = ${Game.player.velocity.x}
-			velocityY = ${Game.player.velocity.y}
-			gravity = ${Game.player.gravity}
-			AABB = ${Game.player.getAABB()}
-			top = ${Game.player.getAABB().top} left = ${Game.player.getAABB().left} right = ${Game.player.getAABB().right} bottom = ${Game.player.getAABB().bottom}
+			inHorizontalCollision = ${Game.level.player.inHorizontalCollision}
+			onGround = ${Game.level.player.onGround}
+			x = ${Game.level.player.x}
+			y = ${Game.level.player.y}
+			blockX = ${Game.level.player.blockPos.x}
+			blockY = ${Game.level.player.blockPos.y}
+			velocityX = ${Game.level.player.velocity.x}
+			velocityY = ${Game.level.player.velocity.y}
+			gravity = ${Game.level.player.gravity}
+			AABB = ${Game.level.player.getAABB()}
+			top = ${Game.level.player.getAABB().top} left = ${Game.level.player.getAABB().left} right = ${Game.level.player.getAABB().right} bottom = ${Game.level.player.getAABB().bottom}
 		""".trimIndent()
 		
 		val rect = Game.hoverBlock.blockState.getAABB(Game.hoverBlock.position)

@@ -3,7 +3,6 @@ import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
 import client.InGameGUI
-import entities.Player
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.js.jso
@@ -79,7 +78,6 @@ object Game : EventEmitter() {
 	lateinit var background: Sprite
 	lateinit var gameProperties: GameProperties
 	lateinit var level: Level
-	lateinit var player: Player
 	lateinit var worldViewport: Viewport
 	
 	init {
@@ -153,7 +151,7 @@ object Game : EventEmitter() {
 		uiViewport.addChild(InGameGUI)
 		window["debug"] = InGameGUI
 		
-		player = Player().apply {
+		level.player.apply {
 			setPosition(level.spawnPoint)
 			worldViewport.addChild(this)
 			worldViewport.moveCenter(position)
@@ -164,9 +162,9 @@ object Game : EventEmitter() {
 		keyMap.onPress("3") { placingBlock = Block.GRASS }
 		keyMap.onPress("4") { placingBlock = Block.LOG }
 		keyMap.onPress("5") { placingBlock = Block.LEAVES }
-		keyMap.onKeep("space") { player.jump() }
-		keyMap.onKeep("left") { player.move(Direction.LEFT) }
-		keyMap.onKeep("right") { player.move(Direction.RIGHT) }
+		keyMap.onKeep("space") { level.player.jump() }
+		keyMap.onKeep("left") { level.player.move(Direction.LEFT) }
+		keyMap.onKeep("right") { level.player.move(Direction.RIGHT) }
 		
 		keyMap.keyboardManager.onPress("F2") {
 			it.preventDefault()
@@ -185,28 +183,36 @@ object Game : EventEmitter() {
 		keyMap.onPress("load") {
 			if (window.localStorage["level"] == null) return@onPress;
 			
+			app.ticker.stop()
 			level.destroy()
 			val save = patchRawSave(window.localStorage["level"]!!)
 			level = loadLevel(save)
 			level.updateRender = true
+			level.player.apply {
+				worldViewport.addChild(this)
+				worldViewport.moveCenter(position)
+			}
 			level.chunks.forEach { it.updateRender = true }
 			level.renderAll()
+			app.ticker.start()
 		}
 		
 		keyMap.onPress("spawn") {
-			player.setPosition(level.spawnPoint)
+			level.player.setPosition(level.spawnPoint)
 		}
 		
 		keyMap.onPress("setspawn") {
-			level.spawnPoint = player.blockPos.toVec2I()
+			level.spawnPoint = level.player.blockPos.toVec2I()
 		}
 	}
 	
 	fun update() {
-		player.update()
+		level.player.update()
 		DebugGUI.update()
 		InGameGUI.update()
 		app.stage.sortChildren()
+		uiViewport.sortChildren()
+		worldViewport.sortChildren()
 		
 		val blockPos = worldViewport.toWorld<IPointData>(mouseManager.position).toVec2I() / Block.SIZE
 		if (!level.inLevel(blockPos)) return

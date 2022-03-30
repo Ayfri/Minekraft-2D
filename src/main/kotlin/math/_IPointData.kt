@@ -16,4 +16,5 @@ else apply {
 	y = y.rounded(length)
 }
 
+fun IPointData.toSave() = "$x,$y"
 fun IPointData.toVec2I() = Vec2I(x, y)

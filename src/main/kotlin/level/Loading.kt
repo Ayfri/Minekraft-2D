@@ -2,7 +2,10 @@ package level
 
 import blocks.Block
 import blocks.BlockState
+import entities.Entity
+import kotlinx.js.console
 import math.Vec2I
+import pixi.typings.math.Point
 
 fun getFormat(save: String) = save.substring(save.indexOf("f:") + 2, save.indexOf("b:")).toIntOrNull() ?: -1
 
@@ -11,36 +14,40 @@ fun loadLevel(save: String): Level {
 	var subString = ""
 	var value = ""
 	var inBlocks = false
+	var inSpawnPoint = false
 	var inValue = false
+	
 	saveFile.format = getFormat(save)
 	
-	save.forEachIndexed { index, c ->
+	for ((index, c) in save.withIndex()) {
 		when (c) {
 			':' -> {
-				if (inBlocks || inValue) value += subString
-				else value = ""
+				if (inBlocks || (inValue && !inSpawnPoint)) value += subString
+				else if (!inSpawnPoint) value = ""
 				
 				if (inValue && value.isNotEmpty()) value += ":"
 				subString = ""
-				return@forEachIndexed
+				continue
 			}
 			',' -> {
 				value += subString
 				subString = ""
-				if (inValue) {
+				if (inValue && !inSpawnPoint) {
 					saveFile.values += SaveBlock(value)
 					value = ""
-					return@forEachIndexed
+					continue
 				}
 			}
 			'b' -> {
-				value = ""
-				subString = ""
-				inBlocks = true
-				return@forEachIndexed
+				if (save[index + 1] == ':') {
+					value = ""
+					subString = ""
+					inBlocks = true
+					continue
+				}
 			}
 			'v' -> {
-				if (inBlocks) {
+				if (inBlocks && save[index + 1] == ':') {
 					value += subString
 					val list = value.split(",").map(String::toInt).windowed(2, 2, true)
 					list.forEach {
@@ -51,37 +58,48 @@ fun loadLevel(save: String): Level {
 					inValue = true
 					subString = ""
 					value = ""
-					return@forEachIndexed
+					continue
 				}
 			}
 			'h' -> {
-				value += subString
-				subString = ""
-				if (inValue && save[index + 1] == ':' && save[index - 1] != ',') {
-					saveFile.values += SaveBlock(value)
-					value = ""
-					inValue = false
+				if (save[index + 1] == ':') {
+					value += subString
+					subString = ""
+					if (inValue && save[index - 1] != ',') {
+						saveFile.values += SaveBlock(value)
+						value = ""
+						inValue = false
+					}
+					continue
 				}
-				return@forEachIndexed
 			}
 			'w' -> {
-				saveFile.height = subString.toInt()
-				subString = ""
-				value = ""
-				return@forEachIndexed
+				if (save[index + 1] == ':') {
+					saveFile.height = subString.toInt()
+					subString = ""
+					continue
+				}
 			}
 			's' -> {
 				if (save[index + 1] == ':') {
 					saveFile.width = subString.toInt()
 					subString = ""
 					value = ""
+					inValue = true
+					inSpawnPoint = true
+				}
+			}
+			'p' -> {
+				if (save[index + 1] == ':') {
+					value += subString
+					saveFile.spawnPoint = value.split(",").take(2).let { Vec2I(it[0].toIntOrNull() ?: 0, it[1].toIntOrNull() ?: 0) }
+					Entity.fromSave(save.substring(index + 2), saveFile.player)
+					break
 				}
 			}
 		}
 		
 		subString += c
-		
-		if (index == save.length - 1) saveFile.spawnPoint = save.substringAfterLast(":").split(",").take(2).let { Vec2I(it[0].toIntOrNull() ?: 0, it[1].toIntOrNull() ?: 0) }
 	}
 	
 	saveFile = patchSave(saveFile)
@@ -96,9 +114,12 @@ fun loadLevel(save: String): Level {
 			}
 		}
 		spawnPoint.copyFrom(saveFile.spawnPoint)
+		player = saveFile.player
 		ticksTicker.start()
 		console.log("Loaded level")
 	}.let {
 		patchLevel(saveFile, it)
 	}
 }
+
+fun Point(save: String): Point = save.split(",").let { Point(it[0].toDouble(), it[1].toDouble()) }

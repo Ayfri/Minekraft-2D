@@ -1,6 +1,7 @@
 package level
 
 import Game
+import entities.Player
 import math.Vec2I
 
 class SaveFile {
@@ -10,11 +11,11 @@ class SaveFile {
 	var width = 0
 	var height = 0
 	var spawnPoint = Vec2I.ZERO
+	var player = Player()
 }
 
 data class SaveBlock(var n: String = "")
 
-@JsName("toSave")
 fun Level.toSave(): String {
 	val json = toJSON()
 	
@@ -28,6 +29,7 @@ fun Level.toSave(): String {
 	}
 	result.append("h:${json.height}")
 	result.append("w:${json.width}")
-	result.append("s:${json.spawnPoint.x},${json.spawnPoint.y}")
+	result.append("s:${json.spawnPoint.toSave()}")
+	result.append("p:${json.player.toSave()}")
 	return result.toString()
 }

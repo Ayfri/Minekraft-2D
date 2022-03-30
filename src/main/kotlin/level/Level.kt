@@ -3,6 +3,7 @@ package level
 import Game
 import blocks.Block
 import blocks.BlockState
+import entities.Player
 import math.AABB
 import math.Vec2I
 import math.vec2i
@@ -18,6 +19,7 @@ import kotlin.random.Random
 class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	val blockStates = MutableList(height * width) { BlockState.AIR }
 	val ticksTicker = Ticker()
+	var player = Player()
 	var spawnPoint = Vec2I.ZERO
 	var updateRender = false
 	val chunks = List((height / Chunk.SIZE) * (width / Chunk.SIZE)) {
@@ -31,6 +33,8 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun destroy() {
 		ticksTicker.destroy()
+		player.destroy(false)
+		Game.worldViewport.plugins.remove("follow")
 		chunks.forEach(Chunk::destroy)
 	}
 	
@@ -216,6 +220,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 			this@apply.height = this@Level.height
 			this@apply.width = this@Level.width
 			this.spawnPoint = this@Level.spawnPoint
+			this.player = this@Level.player
 		}
 	}
 	

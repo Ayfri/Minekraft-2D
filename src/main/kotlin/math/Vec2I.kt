@@ -62,6 +62,7 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	}
 	
 	fun top() = addY(-1)
+	fun toSave() = "$x,$y"
 	fun toPoint() = Point(x.toDouble(), y.toDouble())
 	fun west() = addX(-1)
 	

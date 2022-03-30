@@ -40,7 +40,7 @@ object InGameGUI : Gui() {
 	val selectedLevelBlockOutline = Graphics().also {
 		it.lineStyle(1.0)
 		it.drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
-		it.zIndex = 1000
+		it.zIndex = 100
 		Game.worldViewport.addChild(it)
 	}
 	
@@ -48,9 +48,6 @@ object InGameGUI : Gui() {
 		selectedLevelBlockOutline.visible = Game.hoverBlock.block.visible
 		selectedLevelBlockOutline.position.copyFrom(Game.hoverBlock.position.toPoint() * Block.SIZE.toDouble())
 		
-		if (version.text == "") {
-			console.log(Game.gameProperties)
-			version.text = "${Game.gameProperties.name} ${Game.gameProperties.version}"
-		}
+		if (version.text == "") version.text = "${Game.gameProperties.name} ${Game.gameProperties.version}"
 	}
 }
