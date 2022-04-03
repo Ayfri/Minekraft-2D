@@ -2,6 +2,7 @@
 import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
+import client.Gui
 import client.InGameGUI
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -149,6 +150,8 @@ object Game : EventEmitter() {
 		
 		uiViewport.addChild(DebugGUI)
 		uiViewport.addChild(InGameGUI)
+		DebugGUI.resize()
+		InGameGUI.resize()
 		window["debug"] = InGameGUI
 		
 		level.player.apply {
@@ -204,6 +207,17 @@ object Game : EventEmitter() {
 		keyMap.onPress("setspawn") {
 			level.spawnPoint = level.player.blockPos.toVec2I()
 		}
+		
+		window.onresize = ::resize
+	}
+	
+	fun resize(e: Event) {
+		uiViewport.resize(window.innerWidth.toDouble(), window.innerHeight.toDouble())
+		uiViewport.children.filterIsInstance<Gui>().forEach(Gui::resize)
+		worldViewport.resize(window.innerWidth.toDouble(), window.innerHeight.toDouble())
+		
+		background.width = app.screen.width
+		background.height = app.screen.height
 	}
 	
 	fun update() {

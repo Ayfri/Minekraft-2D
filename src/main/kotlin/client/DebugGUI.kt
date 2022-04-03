@@ -6,29 +6,26 @@ import get
 import kotlinx.browser.window
 import math.rounded
 import pixi.externals.extensions.hide
-import pixi.externals.extensions.setPositionFromWindow
+import pixi.typings.math.Point
 import pixi.typings.ticker.ticker
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object DebugGUI : Gui() {
 	val FPS= text {
-		it.setPositionFromWindow(0.0, 0.05)
 		it.zIndex = 1001
-		addChild(it)
+		addComponent(it, Point(0.0, 0.05))
 	}
 	
 	val fpsValues = mutableListOf<Double>()
 	
 	val playerText = text {
-		it.setPositionFromWindow(0.0, 0.1)
 		it.zIndex = 1001
-		addChild(it)
+		addComponent(it, Point(0.0, 0.1))
 	}
 	
 	val selectedBlockText = text {
-		it.setPositionFromWindow(0.8, 0.0)
 		it.zIndex = 1001
-		addChild(it)
+		addComponent(it, Point(0.8, 0.0))
 	}
 	
 	init {
