@@ -40,6 +40,12 @@ object TextureManager : EventEmitter() {
 						baseTexture.scaleMode = SCALE_MODES.NEAREST
 					}
 				}
+				
+				if (it.key.startsWith("item.")) {
+					Game.itemTextures[it.key.removePrefix("item.")] = it.value.unsafeCast<Texture<Resource>>().apply {
+						baseTexture.scaleMode = SCALE_MODES.NEAREST
+					}
+				}
 			}
 			
 			emit("loaded", arrayOf(textures))

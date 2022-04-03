@@ -41,6 +41,7 @@ import typings.viewport.Viewport
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
 	var hoverBlock = LevelBlock(Block.AIR, Vec2I(0, 0))
+	val itemTextures = mutableMapOf<String, Texture<Resource>>()
 	val keyMap = KeyMap(
 		mapOf(
 			"1" to setOf("1", "&"),
@@ -96,8 +97,10 @@ object Game : EventEmitter() {
 		parseGameProperties()
 		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
 		TextureManager.addPreLoadBlock("air")
-		TextureManager.addPreLoad("player", "textures/player.png")
 		TextureManager.addPreLoad("background", "textures/background.png")
+		TextureManager.addPreLoad("slot", "textures/player_inventory_slot.png")
+		TextureManager.addPreLoad("selected_slot", "textures/selected_slot.png")
+		TextureManager.addPreLoad("player", "textures/player.png")
 		TextureManager.loadTextures()
 		TextureManager.on("loaded") {
 			background = Sprite.from("background")
@@ -216,8 +219,8 @@ object Game : EventEmitter() {
 		uiViewport.children.filterIsInstance<Gui>().forEach(Gui::resize)
 		worldViewport.resize(window.innerWidth.toDouble(), window.innerHeight.toDouble())
 		
-		background.width = app.screen.width
-		background.height = app.screen.height
+		background.width = window.innerWidth.toDouble()
+		background.height = window.innerHeight.toDouble()
 	}
 	
 	fun update() {

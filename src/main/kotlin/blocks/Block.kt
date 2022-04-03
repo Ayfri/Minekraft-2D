@@ -12,7 +12,7 @@ open class Block(val name: String) : EventEmitter() {
 	var visible = true
 	
 	fun register() {
-		println("Registering block: $name")
+		console.log("Registering block: $name")
 		blocks += this
 	}
 	
@@ -61,7 +61,7 @@ open class Block(val name: String) : EventEmitter() {
 		val DIRT = Block("dirt").apply(Block::register)
 		val GRASS = GrassBlock().apply(Block::register)
 		val LOG = Block("log").apply(Block::register)
-		val LEAVES = Block("leaves").apply{
+		val LEAVES = Block("leaves").apply {
 			blocksLight = false
 			register()
 		}

@@ -13,15 +13,15 @@ open class Gui : Container() {
 		zIndex = 500
 	}
 	
-	fun addComponent(sprite: DisplayObject, windowPosition: Point, offset: Point = Point()) {
+	fun addComponent(sprite: DisplayObject, windowPosition: Point = Point(), offset: Point = Point()) {
 		sprites += GuiElement(sprite, windowPosition, offset)
 		addChild(sprite)
 	}
 	
 	fun resize() {
-		sprites.forEach { (sprite, windowPosition, offset) ->
-			sprite.setPositionFromWindow(windowPosition.x, windowPosition.y)
-			sprite.position += offset
+		sprites.forEach { (displayObject, windowPosition, offset) ->
+			displayObject.setPositionFromWindow(windowPosition.x, windowPosition.y)
+			displayObject.position += offset
 		}
 	}
 }
