@@ -238,7 +238,7 @@ object Game : EventEmitter() {
 		if (mouseManager.isPressed(2)) {
 			val selectedItemStack = InGameGUI.playerInventory.selectedItemStack
 			if (selectedItemStack.isAir) return
-			level.setBlockState(blockPos, BlockState(selectedItemStack.item.asBlock().block))
+			level.placeBlockState(blockPos, BlockState(selectedItemStack.item.asBlock().block))
 		}
 	}
 }

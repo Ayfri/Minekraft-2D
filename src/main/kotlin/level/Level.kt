@@ -100,11 +100,8 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun getBlocks(chunk: Chunk) = blockStates.slice(chunk.position.x * Chunk.SIZE * width..chunk.position.x * Chunk.SIZE * width + Chunk.SIZE * width)
 	
-	fun getChunk(blockPos: Vec2I): Chunk? {
-		val chunkX = blockPos.x / Chunk.SIZE
-		val chunkY = blockPos.y / Chunk.SIZE
-		return getChunkAt(chunkX, chunkY)
-	}
+	fun getChunk(blockPos: Vec2I) = getChunk(blockPos.x, blockPos.y)
+	
 	fun getChunk(blockX: Int, blockY: Int): Chunk? {
 		val chunkX = blockX / Chunk.SIZE
 		val chunkY = blockY / Chunk.SIZE
@@ -113,7 +110,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.position.x == x && it.position.y == y }
 	fun getChunkAt(position: Vec2I) = chunks.firstOrNull { it.position == position }
-	
 	
 	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * width]
 	fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
@@ -129,8 +125,13 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		return y - 1
 	}
 	
-	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
-	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
+	fun placeBlockState(blockPos: Vec2I, blockState: BlockState) = placeBlockState(blockPos.x, blockPos.y, blockState)
+	
+	fun placeBlockState(x: Int, y: Int, blockState: BlockState) {
+		if (getBlockState(x, y) != BlockState.AIR) return
+		blockStates[x + y * width] = blockState
+		renderChunkAtBlock(x, y)
+	}
 	
 	fun placeTree(blockPos: Vec2I) {
 		val trunk = BlockState(Block.LOG)
@@ -163,6 +164,19 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		updateRender = true
 	}
 	
+	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
+	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
+	
+	fun renderAll() {
+		chunks.forEach(Chunk::render)
+	}
+	
+	fun renderChunkAt(chunkPos: Vec2I) = getChunkAt(chunkPos)?.render()
+	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
+	fun renderChunkAtBlock(blockPos: Vec2I) = getChunk(blockPos)?.render()
+	
+	fun setBlockState(blockPos: Vec2I, blockState: BlockState) = setBlockState(blockPos.x, blockPos.y, blockState)
+	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
 		blockStates[x + y * width] = blockState
@@ -176,16 +190,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		}
 	}
 	
-	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
-	fun renderChunkAtBlock(blockPos: Vec2I) = getChunk(blockPos)?.render()
-	fun renderChunkAt(chunkPos: Vec2I) = getChunkAt(chunkPos)?.render()
-	
-	fun renderAll() {
-		chunks.forEach(Chunk::render)
-	}
-	
-	fun setBlockState(position: Vec2I, blockState: BlockState) = setBlockState(position.x, position.y, blockState)
-	
 	fun tick() {
 		chunks.forEach(Chunk::tick)
 	}
@@ -194,11 +198,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		val blockState = getBlockState(x, y)
 		if (!blockState.block.tickable) return
 		blockState.block.emit("tick", arrayOf(blockState, Vec2I(x, y), this))
-	}
-	
-	fun updateBlockState(x: Int, y: Int) {
-		val blockState = getBlockState(x, y)
-		blockState.block.emit("update", arrayOf(blockState, Vec2I(x, y), this))
 	}
 	
 	companion object {
