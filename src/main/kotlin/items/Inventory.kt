@@ -6,7 +6,7 @@ import pixi.typings.core.Texture
 open class Inventory(val size: Int = 9) {
 	val itemStacks = MutableList(size) { ItemStack.AIR }
 	
-	val isEmpty get() = itemStacks.all { it.isEmpty }
+	val isEmpty get() = itemStacks.all { it.isAir }
 	
 	operator fun contains(item: Item) = itemStacks.any { it.item == item }
 	

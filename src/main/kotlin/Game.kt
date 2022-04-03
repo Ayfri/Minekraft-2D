@@ -64,11 +64,6 @@ object Game : EventEmitter() {
 		ignoreCase = true
 	)
 	val mouseManager = MouseManager()
-	var placingBlock = Block.STONE
-		set(value) {
-			InGameGUI.selectedBlockSprite.texture = blockTextures[value.name]!!
-			field = value
-		}
 	
 	val uiViewport = Viewport(jso {
 		screenWidth = window.innerWidth.toDouble()
@@ -163,11 +158,15 @@ object Game : EventEmitter() {
 			worldViewport.moveCenter(position)
 		}
 		
-		keyMap.onPress("1") { placingBlock = Block.STONE }
-		keyMap.onPress("2") { placingBlock = Block.DIRT }
-		keyMap.onPress("3") { placingBlock = Block.GRASS }
-		keyMap.onPress("4") { placingBlock = Block.LOG }
-		keyMap.onPress("5") { placingBlock = Block.LEAVES }
+		keyMap.onPress("1") { InGameGUI.playerInventory.selectedSlot = 0 }
+		keyMap.onPress("2") { InGameGUI.playerInventory.selectedSlot = 1 }
+		keyMap.onPress("3") { InGameGUI.playerInventory.selectedSlot = 2 }
+		keyMap.onPress("4") { InGameGUI.playerInventory.selectedSlot = 3 }
+		keyMap.onPress("5") { InGameGUI.playerInventory.selectedSlot = 4 }
+		keyMap.onPress("6") { InGameGUI.playerInventory.selectedSlot = 5 }
+		keyMap.onPress("7") { InGameGUI.playerInventory.selectedSlot = 6 }
+		keyMap.onPress("8") { InGameGUI.playerInventory.selectedSlot = 7 }
+		keyMap.onPress("9") { InGameGUI.playerInventory.selectedSlot = 8 }
 		keyMap.onKeep("space") { level.player.jump() }
 		keyMap.onKeep("left") { level.player.move(Direction.LEFT) }
 		keyMap.onKeep("right") { level.player.move(Direction.RIGHT) }
@@ -236,6 +235,10 @@ object Game : EventEmitter() {
 		hoverBlock = LevelBlock(level.getBlockState(blockPos).block, blockPos)
 		
 		if (mouseManager.isPressed(0)) level.removeBlockState(blockPos)
-		if (mouseManager.isPressed(2)) level.setBlockState(blockPos, BlockState(placingBlock))
+		if (mouseManager.isPressed(2)) {
+			val selectedItemStack = InGameGUI.playerInventory.selectedItemStack
+			if (selectedItemStack.isAir) return
+			level.setBlockState(blockPos, BlockState(selectedItemStack.item.asBlock().block))
+		}
 	}
 }

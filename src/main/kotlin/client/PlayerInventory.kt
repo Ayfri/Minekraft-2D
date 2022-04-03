@@ -14,9 +14,11 @@ object PlayerInventory : Inventory() {
 			it.height = ITEM_SIZE
 		}
 	}
+	
 	val graphics = Graphics().apply {
 		sprites.forEach { addChild(it) }
 	}
+	
 	val selectedSlotGraphics = Graphics().apply {
 		beginTextureFill(jso {
 			texture = SELECTED_SLOT_TEXTURE.clone().apply {
@@ -26,6 +28,8 @@ object PlayerInventory : Inventory() {
 		drawRect(0.0, 0.0, SELECTED_SLOT_SIZE, SELECTED_SLOT_SIZE)
 		endFill()
 	}
+	
+	val selectedItemStack get() = this[selectedSlot]
 	
 	var selectedSlot = 0
 		set(value) {
@@ -50,7 +54,7 @@ object PlayerInventory : Inventory() {
 			graphics.endFill()
 			
 			val itemStack = this[i]
-			if (itemStack.isEmpty || itemStack.isAir) continue
+			if (itemStack.isAir) continue
 			val texture = itemStack.item.getTexture() ?: continue
 			
 			sprites[i].texture = texture

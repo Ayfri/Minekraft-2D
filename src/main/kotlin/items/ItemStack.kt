@@ -4,15 +4,13 @@ class ItemStack(val item: Item, count: Int = 1) {
 	var count = count
 		set(value) {
 			field =
-				if (isAir || isEmpty) 0
-				else value.coerceIn(0, maxCount)
+				if (isAir) 0
+				else value.coerceIn(1, maxCount)
 		}
 	
+	val isAir get() = this == AIR
 	
 	var maxCount = 99
-	
-	val isAir get() = this == AIR
-	val isEmpty get() = count == 0
 	
 	fun isSimilar(stack: ItemStack) = item == stack.item
 	

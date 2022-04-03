@@ -5,6 +5,10 @@ import blocks.Block
 import pixi.typings.utils.EventEmitter
 
 open class Item(val name: String) : EventEmitter() {
+	open fun asBlock() = this as ItemBlock
+	
+	open fun isBlock() = this is ItemBlock
+	
 	open fun getTexture() = Game.itemTextures[name]
 	
 	fun register() {
