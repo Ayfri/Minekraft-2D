@@ -2,6 +2,8 @@ package level
 
 import Game
 import entities.Entity
+import items.Item
+import items.ItemStack
 import math.toSave
 
 data class SaveBlock(var n: String = "")
@@ -52,5 +54,16 @@ fun Level.toSave(): String {
 	result.append("w:${width}")
 	result.append("s:${spawnPoint.toSave()}")
 	result.append("p:${player.toSave()}")
+	return result.toString()
+}
+
+fun Item.toSave(): String {
+	val result = StringBuilder("n:$name")
+	return result.toString()
+}
+
+fun ItemStack.toSave(): String {
+	val result = StringBuilder("i:${item.toSave()}")
+	result.append("c:$count")
 	return result.toString()
 }
