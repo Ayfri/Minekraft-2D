@@ -18,13 +18,15 @@ import kotlin.random.Random
 
 class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	val blockStates = MutableList(height * width) { BlockState.AIR }
-	val ticksTicker = Ticker()
-	var player = Player()
-	var spawnPoint = Vec2I.ZERO
-	var updateRender = false
 	val chunks = List((height / Chunk.SIZE) * (width / Chunk.SIZE)) {
 		Chunk(this, Vec2I(it % (width / Chunk.SIZE), it / (width / Chunk.SIZE)))
 	}
+	var player = Player()
+	var seed = Random.nextInt(Int.MAX_VALUE)
+		internal set
+	var spawnPoint = Vec2I.ZERO
+	val ticksTicker = Ticker()
+	var updateRender = false
 	
 	init {
 		ticksTicker.add { tick() }
@@ -42,7 +44,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
 	
 	fun generateWorld() {
-		val seed = Random.nextInt(Int.MAX_VALUE)
 		val surfaceLayers = mutableListOf<Int>()
 		for (x in 0 until width) {
 			val preciseNoise = (1 + PerlinNoise.noise(((x * 10 + 0.1) / width) + seed, height / 4.2)) / 6
@@ -193,35 +194,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		val blockState = getBlockState(x, y)
 		if (!blockState.block.tickable) return
 		blockState.block.emit("tick", arrayOf(blockState, Vec2I(x, y), this))
-	}
-	
-	@JsName("toJSON")
-	fun toJSON(): SaveFile {
-		val blocks = mutableListOf<MutableList<Int>>()
-		val values = blockStates.distinct()
-		
-		var currentBlock = blockStates[0]
-		var currentCount = 0
-		blockStates.forEach {
-			if (it == currentBlock) {
-				currentCount++
-			} else {
-				blocks += mutableListOf(values.indexOf(currentBlock), currentCount)
-				currentBlock = it
-				currentCount = 1
-			}
-		}
-		blocks += mutableListOf(values.indexOf(currentBlock), currentCount)
-		
-		return SaveFile().apply {
-			this.format = Game.gameProperties.saveFormat.toInt()
-			this.blocks = blocks
-			this.values = values.map { it.toJSON() }.toMutableList()
-			this@apply.height = this@Level.height
-			this@apply.width = this@Level.width
-			this.spawnPoint = this@Level.spawnPoint
-			this.player = this@Level.player
-		}
 	}
 	
 	fun updateBlockState(x: Int, y: Int) {
