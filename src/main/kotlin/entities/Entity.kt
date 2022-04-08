@@ -60,7 +60,7 @@ abstract class Entity : Sprite() {
 	}
 	
 	fun handleCollisions(level: Level) {
-		val entityAABB = getAABB()
+		val entityAABB = getAABBBlocks()
 		val entityAABBSearchBlocks = entityAABB.clone().pad(1.0, 2.0)
 		var onGround = false
 		var inHorizontalCollision = false
@@ -70,8 +70,8 @@ abstract class Entity : Sprite() {
 		}
 		
 		if (window["debugCollisions"] == true && velocity.squaredLength > EPSILON) {
-			graphics.lineStyle(1.5, 0xFF00FF)
-			val bounds = getLocalBounds().move(x + velocity.x, y + velocity.y)
+			graphics.lineStyle(1.0, 0xFF00FF)
+			val bounds = getAABB().move(velocity.x, velocity.y)
 			graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
 		}
 		
@@ -80,18 +80,18 @@ abstract class Entity : Sprite() {
 				val block = level.getBlockStateOrNull(blockX, blockY) ?: continue
 				if (!block.block.collidable) continue
 				
-				graphics.lineStyle(1.0, 0xFF0000)
+				graphics.lineStyle(0.5, 0xFF0000)
 				
 				val blockAABB = block.getAABB(Vec2I(blockX, blockY))
 				
 				if (blockAABB.intersects(nextAABB)) {
-					graphics.lineStyle(1.0, 0x00FF00)
+					graphics.lineStyle(0.6, 0x00FF00)
 					
 					if (velocity.y > 0.0) {
 						if (blockAABB.top < nextAABB.bottom && blockAABB.top > nextAABB.top) {
 							velocity.y = 0.0
 							onGround = true
-							graphics.lineStyle(1.0, 0xFFFF00)
+							graphics.lineStyle(0.7, 0xFFFF00)
 							graphics.drawRect(blockX * Block.SIZE.toDouble(), blockY * Block.SIZE.toDouble(), Block.SIZE.toDouble(), Block.SIZE.toDouble())
 						}
 					} else if (velocity.y < 0.0) {
@@ -127,12 +127,13 @@ abstract class Entity : Sprite() {
 		this.inHorizontalCollision = inHorizontalCollision
 	}
 	
-	open fun getAABB() = getLocalBounds().clone().also {
-		it.move(x, y)
-		it / Block.SIZE.toDouble()
+	open fun getAABBBlocks() = getAABB().also {
+		it / Block.SIZE
 	}
 	
-	open fun jump(force: Double = 3.5) {
+	open fun getAABB() = getLocalBounds().clone().move(x, y)
+	
+	open fun jump(force: Double = 3.0) {
 		if (onGround) {
 			velocity.y = -force
 			position.y -= 1.0
@@ -149,15 +150,19 @@ abstract class Entity : Sprite() {
 	
 	fun setPosition(blockPos: Vec2I) = position.copyFrom((blockPos * Block.SIZE).toPoint())
 	
-	fun setTexture(name: String) {
+	fun setTexture(name: String, width: Double? = null, height: Double? = null) {
 		texture = Texture.from("textures/$name.png")
+		
+		if (width != null && height != null) {
+			scale.set(width / texture.width, height / texture.height);
+		}
 	}
 	
 	open fun update() {
 		if (hasGravity) velocity.y += gravity
 		
-		velocity.x = velocity.x.coerceIn(-maxVelocity..maxVelocity)
-		velocity.y = velocity.y.coerceIn(-maxVelocity..maxVelocity)
+		velocity.x.coerceIn(-maxVelocity..maxVelocity).also { velocity.x = it }
+		velocity.y.coerceIn(-maxVelocity..maxVelocity).also { velocity.y = it }
 		
 		if (abs(velocity.x) < EPSILON) velocity.x = 0.0
 		if (abs(velocity.y) < EPSILON) velocity.y = 0.0
@@ -167,12 +172,12 @@ abstract class Entity : Sprite() {
 			renderable = false
 			graphics.clear()
 			graphics.apply {
-				lineStyle(2.0, 0x0000FF)
-				val bounds = this@Entity.getLocalBounds().move(this@Entity.x, this@Entity.y)
+				lineStyle(1.3, 0x0000FF)
+				val bounds = getAABB()
 				drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
-				lineStyle(1.0, 0x000000)
+				lineStyle(0.4, 0x000000)
 				beginFill(0x00FF00)
-				drawCircle(this@Entity.position.x, this@Entity.position.y, 1.5)
+				drawCircle(this@Entity.position.x, this@Entity.position.y, 1.0)
 				endFill()
 			}
 		} else {

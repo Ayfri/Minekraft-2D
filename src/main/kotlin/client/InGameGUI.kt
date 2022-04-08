@@ -21,7 +21,7 @@ object InGameGUI : Gui() {
 	}
 	
 	val selectedLevelBlockOutline = Graphics().also {
-		it.lineStyle(1.0)
+		it.lineStyle(0.5)
 		it.drawRect(0.0, 0.0, Block.SIZE.toDouble(), Block.SIZE.toDouble())
 		it.zIndex = 100
 		Game.worldViewport.addChild(it)

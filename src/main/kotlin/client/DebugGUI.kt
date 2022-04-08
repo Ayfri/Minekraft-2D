@@ -51,8 +51,8 @@ object DebugGUI : Gui() {
 			velocityX = ${Game.level.player.velocity.x}
 			velocityY = ${Game.level.player.velocity.y}
 			gravity = ${Game.level.player.gravity}
-			AABB = ${Game.level.player.getAABB()}
-			top = ${Game.level.player.getAABB().top} left = ${Game.level.player.getAABB().left} right = ${Game.level.player.getAABB().right} bottom = ${Game.level.player.getAABB().bottom}
+			AABB = ${Game.level.player.getAABBBlocks()}
+			top = ${Game.level.player.getAABBBlocks().top} left = ${Game.level.player.getAABBBlocks().left} right = ${Game.level.player.getAABBBlocks().right} bottom = ${Game.level.player.getAABBBlocks().bottom}
 		""".trimIndent()
 		
 		val rect = Game.hoverBlock.blockState.getAABB(Game.hoverBlock.position)
