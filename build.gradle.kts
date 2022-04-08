@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 
 plugins {
-    kotlin("js") version "1.6.10"
+    kotlin("js") version "1.6.20"
 }
 
 group = "fr.ayfri"
@@ -22,7 +22,6 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.3")
     implementation("io.github.ayfri:PIXI-Kotlin:0.4.0")
-    implementation(npm("@pixi/filter-outline", "4.1.5"))
     implementation(npm("@pixi/tilemap", "3.2.1"))
     implementation(npm("pixi-viewport", "4.34.4"))
 }
