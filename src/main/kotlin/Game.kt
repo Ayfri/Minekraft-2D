@@ -1,9 +1,9 @@
-
 import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
 import client.Gui
 import client.InGameGUI
+import client.MenuGUI
 import client.PlayerInventory
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -20,8 +20,10 @@ import org.w3c.dom.events.Event
 import org.w3c.dom.get
 import org.w3c.dom.set
 import pixi.externals.Color
+import pixi.externals.extensions.add
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
+import pixi.externals.extensions.hide
 import pixi.externals.extensions.on
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
@@ -29,6 +31,7 @@ import pixi.typings.interaction.Button
 import pixi.typings.interaction.InteractionManager
 import pixi.typings.math.IPointData
 import pixi.typings.sprite.Sprite
+import pixi.typings.ticker.Ticker
 import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
 import pixi.typings.utils.EventEmitter
@@ -42,6 +45,7 @@ import typings.viewport.Viewport
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
+	val clientTicker = Ticker()
 	val emptyTexture = Texture.from("textures/blocks/void.png")
 	var hoverBlock = LevelBlock(Block.AIR, Vec2I(0, 0))
 	val itemTextures = mutableMapOf<String, Texture<Resource>>()
@@ -67,7 +71,6 @@ object Game : EventEmitter() {
 		ignoreCase = true
 	)
 	val mouseManager = MouseManager()
-	
 	val uiViewport = Viewport(jso {
 		screenWidth = window.innerWidth.toDouble()
 		screenHeight = window.innerHeight.toDouble()
@@ -114,7 +117,8 @@ object Game : EventEmitter() {
 			resolution = window.devicePixelRatio
 		}
 		app.addToBody()
-		app.ticker.add({ _, _ -> update() }, UPDATE_PRIORITY.HIGH)
+		clientTicker.add(UPDATE_PRIORITY.HIGH) { update() }
+		app.ticker.add(UPDATE_PRIORITY.HIGH) { uiUpdate() }
 		window["app"] = app
 		
 		background.apply {
@@ -153,8 +157,10 @@ object Game : EventEmitter() {
 		
 		uiViewport.addChild(DebugGUI)
 		uiViewport.addChild(InGameGUI)
+		uiViewport.addChild(MenuGUI)
 		DebugGUI.resize()
 		InGameGUI.resize()
+		MenuGUI.resize()
 		window["debug"] = InGameGUI
 		
 		level.player.apply {
@@ -172,9 +178,18 @@ object Game : EventEmitter() {
 		keyMap.onPress("7") { InGameGUI.playerInventory.selectedSlot = 6 }
 		keyMap.onPress("8") { InGameGUI.playerInventory.selectedSlot = 7 }
 		keyMap.onPress("9") { InGameGUI.playerInventory.selectedSlot = 8 }
-		keyMap.onKeep("space") { level.player.jump() }
-		keyMap.onKeep("left") { level.player.move(Direction.LEFT) }
-		keyMap.onKeep("right") { level.player.move(Direction.RIGHT) }
+		keyMap.onKeep("space") {
+			if (!clientTicker.started) return@onKeep
+			level.player.jump()
+		}
+		keyMap.onKeep("left") {
+			if (!clientTicker.started) return@onKeep
+			level.player.move(Direction.LEFT)
+		}
+		keyMap.onKeep("right") {
+			if (!clientTicker.started) return@onKeep
+			level.player.move(Direction.RIGHT)
+		}
 		
 		keyMap.keyboardManager.onPress("F2") {
 			it.preventDefault()
@@ -195,7 +210,7 @@ object Game : EventEmitter() {
 		}
 		
 		keyMap.onPress("load") {
-			if (window.localStorage["level"] == null) return@onPress;
+			if (window.localStorage["level"] == null) return@onPress
 			
 			app.ticker.stop()
 			level.destroy()
@@ -219,6 +234,16 @@ object Game : EventEmitter() {
 			level.spawnPoint = level.player.blockPos.toVec2I()
 		}
 		
+		keyMap.keyboardManager.onPress("escape") {
+			if (!MenuGUI.visible) {
+				clientTicker.stop()
+				MenuGUI.show()
+			} else {
+				clientTicker.start()
+				MenuGUI.hide()
+			}
+		}
+		clientTicker.start()
 		window.onresize = ::resize
 	}
 	
@@ -231,10 +256,13 @@ object Game : EventEmitter() {
 		background.height = window.innerHeight.toDouble()
 	}
 	
-	fun update() {
-		level.player.update()
+	fun uiUpdate() {
 		DebugGUI.update()
 		InGameGUI.update()
+	}
+	
+	fun update() {
+		level.player.update()
 		app.stage.sortChildren()
 		uiViewport.sortChildren()
 		worldViewport.sortChildren()

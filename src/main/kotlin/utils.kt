@@ -1,4 +1,13 @@
+import kotlinx.js.jso
 import org.w3c.dom.Window
+import pixi.externals.Color
+import pixi.externals.extensions.Sprite
+import pixi.externals.extensions.color
+import pixi.typings.app.Application
+import pixi.typings.core.IGenerateTextureOptions
+import pixi.typings.core.IRenderableObject
+import pixi.typings.core.RenderTexture
+import pixi.typings.core.Texture
 
 operator fun Window.set(key: String, value: Any?) {
 	asDynamic()[key] = value
@@ -15,4 +24,28 @@ fun Any?.stringify(): String {
 		}
 		value
 	}, 4)
+}
+
+
+class GenerateBlankTextureOptions {
+	var app: Application? = null
+	var color: Color? = null
+	var height: Number? = null
+	var resolution: Double? = null
+	var width: Number? = null
+}
+
+
+fun generateBlankTexture(options: (GenerateBlankTextureOptions) -> Unit): RenderTexture {
+	val opts = GenerateBlankTextureOptions().also(options)
+	val sprite = Sprite(Texture.WHITE).apply {
+		opts.width?.let { width = it.toDouble() }
+		opts.height?.let { height = it.toDouble() }
+		opts.color?.let { color = it }
+	}
+	
+	return opts.app!!.renderer.generateTexture(sprite.unsafeCast<IRenderableObject>(), jso<IGenerateTextureOptions> {
+		opts.resolution?.let { resolution = it }
+		region = sprite.getBounds()
+	})
 }
