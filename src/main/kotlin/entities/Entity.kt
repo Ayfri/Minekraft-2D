@@ -8,12 +8,11 @@ import level.Level
 import math.Direction
 import math.EPSILON
 import math.Vec2I
-import math.div
-import math.times
 import pixi.externals.extensions.div
 import pixi.externals.extensions.move
 import pixi.externals.extensions.plus
 import pixi.externals.extensions.squaredLength
+import pixi.externals.extensions.times
 import pixi.externals.extensions.toPoint
 import pixi.typings.core.Texture
 import pixi.typings.graphics.Graphics
@@ -36,7 +35,7 @@ abstract class Entity : Sprite() {
 	}
 	
 	var blockPos
-		get() = position.clone() / Block.SIZE
+		get() = position.toPoint().clone() / Block.SIZE
 		set(value) {
 			position.copyFrom(value.toPoint() * Block.SIZE)
 		}
@@ -128,8 +127,9 @@ abstract class Entity : Sprite() {
 		this.inHorizontalCollision = inHorizontalCollision
 	}
 	
-	open fun getAABB() = getLocalBounds().clone().move(x, y).apply {
-		this / Block.SIZE.toDouble()
+	open fun getAABB() = getLocalBounds().clone().also {
+		it.move(x, y)
+		it / Block.SIZE.toDouble()
 	}
 	
 	open fun jump(force: Double = 3.5) {

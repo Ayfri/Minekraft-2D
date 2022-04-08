@@ -4,11 +4,11 @@ import Game
 import blocks.Block
 import kotlinx.js.jso
 import math.Vec2I
-import math.times
 import pixi.externals.extensions.collidesWith
 import pixi.externals.extensions.div
 import pixi.externals.extensions.plus
 import pixi.externals.extensions.rangeTo
+import pixi.externals.extensions.times
 import typings.tilemap.CompositeTilemap
 import kotlin.random.Random
 
@@ -24,10 +24,6 @@ class Chunk(val level: Level, val position: Vec2I) {
 	
 	val x get() = position.x
 	val y get() = position.y
-	
-	init {
-	
-	}
 	
 	fun destroy() {
 		tilemap.destroy(false)
