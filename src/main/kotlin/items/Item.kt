@@ -5,9 +5,10 @@ import blocks.Block
 import pixi.typings.utils.EventEmitter
 
 open class Item(val name: String) : EventEmitter() {
-	open fun asBlock() = this as ItemBlock
 	
-	open fun isBlock() = this is ItemBlock
+	open val asBlock get() = this as ItemBlock
+	
+	open val isBlock get() = this is ItemBlock
 	
 	open fun getTexture() = Game.itemTextures[name] ?: Game.emptyTexture
 	
@@ -27,7 +28,6 @@ open class Item(val name: String) : EventEmitter() {
 	override fun hashCode() = name.hashCode()
 	
 	override fun toString() = "Item(name='$name')"
-	
 	
 	companion object {
 		val items = mutableListOf<Item>()

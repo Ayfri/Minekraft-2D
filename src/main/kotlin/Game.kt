@@ -4,6 +4,7 @@ import blocks.BlockState
 import client.DebugGUI
 import client.Gui
 import client.InGameGUI
+import client.PlayerInventory
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.js.jso
@@ -24,6 +25,7 @@ import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
+import pixi.typings.interaction.Button
 import pixi.typings.interaction.InteractionManager
 import pixi.typings.math.IPointData
 import pixi.typings.sprite.Sprite
@@ -242,10 +244,18 @@ object Game : EventEmitter() {
 		hoverBlock = LevelBlock(level.getBlockState(blockPos).block, blockPos)
 		
 		if (mouseManager.isPressed(0)) level.removeBlockState(blockPos)
+		
+		mouseManager.onMouseDown(Button.AUXILIARY) {
+			it.preventDefault()
+			if (!hoverBlock.block.isAir && PlayerInventory.hasBlock(hoverBlock.block)) {
+				PlayerInventory.selectedSlot = PlayerInventory.findFirst(hoverBlock.block)
+			}
+		}
+		
 		if (mouseManager.isPressed(2)) {
 			val selectedItemStack = InGameGUI.playerInventory.selectedItemStack
 			if (selectedItemStack.isAir) return
-			level.placeBlockState(blockPos, BlockState(selectedItemStack.item.asBlock().block))
+			level.placeBlockState(blockPos, BlockState(selectedItemStack.item.asBlock.block))
 		}
 	}
 }

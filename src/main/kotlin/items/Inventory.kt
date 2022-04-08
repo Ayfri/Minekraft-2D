@@ -1,11 +1,11 @@
 package items
 
+import blocks.Block
 import pixi.typings.constants.SCALE_MODES
 import pixi.typings.core.Texture
 
 open class Inventory(val size: Int = 9) {
 	val itemStacks = MutableList(size) { ItemStack.AIR }
-	
 	val isEmpty get() = itemStacks.all { it.isAir }
 	
 	operator fun contains(item: Item) = itemStacks.any { it.item == item }
@@ -34,6 +34,8 @@ open class Inventory(val size: Int = 9) {
 	
 	fun hasAny(item: Item) = itemStacks.any { it.item == item }
 	
+	fun hasBlock(block: Block) = itemStacks.any { it.isBlock && it.item.asBlock.block == block }
+	
 	fun hasPlace(itemStack: ItemStack) = itemStacks.any { it.isAir || it.isSimilar(itemStack) }
 	
 	fun hasStack(itemStack: ItemStack) = itemStacks.any { it == itemStack }
@@ -41,6 +43,8 @@ open class Inventory(val size: Int = 9) {
 	fun findPlace(itemStack: ItemStack) = itemStacks.indexOfFirst { it.isAir || it.isSimilar(itemStack) }
 	
 	fun findAllIndexes(item: Item) = itemStacks.indices.filter { itemStacks[it].item == item }
+	
+	fun findFirst(block: Block) = itemStacks.indexOfFirst { it.isBlock && it.item.asBlock.block == block }
 	
 	fun findFirst(item: Item) = itemStacks.indexOfFirst { it.item == item }
 	

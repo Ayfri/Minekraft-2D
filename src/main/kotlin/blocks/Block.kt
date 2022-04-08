@@ -11,6 +11,8 @@ open class Block(val name: String) : EventEmitter() {
 	var tickable = false
 	var visible = true
 	
+	val isAir get() = this is AirBlock
+	
 	fun register() {
 		console.log("Registering block: $name")
 		blocks += this

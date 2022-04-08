@@ -8,6 +8,8 @@ class ItemStack(val item: Item, count: Int = 1) {
 				else value.coerceIn(1, maxCount)
 		}
 	
+	val isBlock get() = item.isBlock
+	
 	val isAir get() = this == AIR
 	
 	var maxCount = 99
