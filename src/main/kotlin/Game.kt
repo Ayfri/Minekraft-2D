@@ -181,6 +181,10 @@ object Game : EventEmitter() {
 			DebugGUI.visible = !DebugGUI.visible
 		}
 		
+		keyMap.keyboardManager.onPress("F4") {
+			window["debugCollisions"] = !window["debugCollisions"].toString().toBoolean()
+		}
+		
 		keyMap.onPress("save") {
 			window.localStorage["level"] = level.toSave()
 		}
