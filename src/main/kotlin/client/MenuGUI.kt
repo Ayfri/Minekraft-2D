@@ -1,5 +1,6 @@
 package client
 
+import Game
 import app
 import client.components.button
 import generateBlankTexture
@@ -18,9 +19,10 @@ object MenuGUI : Gui() {
 	val returnToGameButton = button {
 		text = "Return to game"
 		onClick = {
-			console.log("Return to game")
+			hide()
 		}
 	}.also {
+		console.log(it.width)
 		it.zIndex = 2200
 		addComponent(it, Point(0.5, 0.2))
 	}
@@ -31,7 +33,7 @@ object MenuGUI : Gui() {
 		it.height = window.innerHeight.toDouble()
 		it.width = window.innerWidth.toDouble()
 	}).also {
-		it.alpha = 0.1
+		it.alpha = 0.2
 		it.anchor.set(0.5)
 		it.zIndex = 2000
 		addComponent(it, Point(0.5, 0.5))
@@ -40,5 +42,15 @@ object MenuGUI : Gui() {
 	fun show() {
 		visible = true
 		returnToGameButton.resize()
+		components.find { it.displayObject == returnToGameButton }?.offset?.set(-returnToGameButton.width / 2, -returnToGameButton.height / 2)
+		resize()
+		Game.clientTicker.stop()
+		Game.worldViewport.pause = true
+	}
+	
+	fun hide() {
+		visible = false
+		Game.clientTicker.start()
+		Game.worldViewport.pause = false
 	}
 }

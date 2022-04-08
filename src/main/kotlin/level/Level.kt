@@ -201,7 +201,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	companion object {
-		const val HEIGHT = Chunk.SIZE * 12
-		const val WIDTH = Chunk.SIZE * 32
+		const val HEIGHT = Chunk.SIZE * 24
+		const val WIDTH = Chunk.SIZE * 64
 	}
 }

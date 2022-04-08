@@ -1,3 +1,4 @@
+
 import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
@@ -23,7 +24,6 @@ import pixi.externals.Color
 import pixi.externals.extensions.add
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
-import pixi.externals.extensions.hide
 import pixi.externals.extensions.on
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
@@ -235,13 +235,8 @@ object Game : EventEmitter() {
 		}
 		
 		keyMap.keyboardManager.onPress("escape") {
-			if (!MenuGUI.visible) {
-				clientTicker.stop()
-				MenuGUI.show()
-			} else {
-				clientTicker.start()
-				MenuGUI.hide()
-			}
+			if (!MenuGUI.visible) MenuGUI.show()
+			else MenuGUI.hide()
 		}
 		clientTicker.start()
 		window.onresize = ::resize

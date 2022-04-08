@@ -7,19 +7,19 @@ import pixi.typings.display.DisplayObject
 import pixi.typings.math.Point
 
 open class Gui : Container() {
-	private val sprites = mutableListOf<GuiElement>()
+	protected val components = mutableListOf<GuiElement>()
 	
 	init {
 		zIndex = 500
 	}
 	
 	fun addComponent(sprite: DisplayObject, windowPosition: Point = Point(), offset: Point = Point()) {
-		sprites += GuiElement(sprite, windowPosition, offset)
+		components += GuiElement(sprite, windowPosition, offset)
 		addChild(sprite)
 	}
 	
 	fun resize() {
-		sprites.forEach { (displayObject, windowPosition, offset) ->
+		components.forEach { (displayObject, windowPosition, offset) ->
 			displayObject.setPositionFromWindow(windowPosition.x, windowPosition.y)
 			displayObject.position += offset
 		}
