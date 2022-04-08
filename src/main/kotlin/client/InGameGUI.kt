@@ -16,6 +16,7 @@ object InGameGUI : Gui() {
 		it += ItemStack(Item.GRASS, 99)
 		it += ItemStack(Item.LOG, 99)
 		it += ItemStack(Item.LEAVES, 99)
+		it += ItemStack(Item.PLANKS, 99)
 		addComponent(it.graphics, Point(0.5, 0.9), Point(it.SELECTED_SLOT_OFFSET + -((it.SLOT_SIZE * it.size) / 2), 0.0))
 		addComponent(it.selectedSlotGraphics)
 	}

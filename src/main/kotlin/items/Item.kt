@@ -9,7 +9,7 @@ open class Item(val name: String) : EventEmitter() {
 	
 	open fun isBlock() = this is ItemBlock
 	
-	open fun getTexture() = Game.itemTextures[name]
+	open fun getTexture() = Game.itemTextures[name] ?: Game.emptyTexture
 	
 	fun register() {
 		console.log("Registering item: $name")
@@ -38,5 +38,6 @@ open class Item(val name: String) : EventEmitter() {
 		val GRASS = ItemBlock(Block.GRASS).apply(Item::register)
 		val LOG = ItemBlock(Block.LOG).apply(Item::register)
 		val LEAVES = ItemBlock(Block.LEAVES).apply(Item::register)
+		val PLANKS = ItemBlock(Block.PLANKS).apply(Item::register)
 	}
 }

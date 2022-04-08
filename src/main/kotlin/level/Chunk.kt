@@ -56,7 +56,7 @@ class Chunk(val level: Level, val position: Vec2I) {
 		
 		for (x in 0 until SIZE) {
 			for (y in 0 until SIZE) {
-				tilemap.tile(Game.blockTextures[getBlock(x, y).block.name] ?: return, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
+				tilemap.tile(Game.blockTextures[getBlock(x, y).block.name] ?: Game.emptyTexture, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
 					tileHeight = Block.SIZE
 					tileWidth = Block.SIZE
 				})

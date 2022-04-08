@@ -65,6 +65,7 @@ open class Block(val name: String) : EventEmitter() {
 			blocksLight = false
 			register()
 		}
+		val PLANKS = Block("planks").apply(Block::register)
 		
 		fun fromSaveBlock(saveBlock: SaveBlock) = blocks.find { it.name == saveBlock.n } ?: AIR
 	}

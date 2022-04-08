@@ -40,6 +40,7 @@ import typings.viewport.Viewport
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
+	val emptyTexture = Texture.from("textures/blocks/void.png")
 	var hoverBlock = LevelBlock(Block.AIR, Vec2I(0, 0))
 	val itemTextures = mutableMapOf<String, Texture<Resource>>()
 	val keyMap = KeyMap(
@@ -96,6 +97,7 @@ object Game : EventEmitter() {
 		TextureManager.addPreLoad("slot", "textures/player_inventory_slot.png")
 		TextureManager.addPreLoad("selected_slot", "textures/selected_slot.png")
 		TextureManager.addPreLoad("player", "textures/player.png")
+		TextureManager.addPreLoad("void", "textures/blocks/void.png")
 		TextureManager.loadTextures()
 		TextureManager.on("loaded") {
 			background = Sprite.from("background")
@@ -128,6 +130,7 @@ object Game : EventEmitter() {
 			worldWidth = Level.WIDTH * Block.SIZE.toDouble()
 			worldHeight = Level.HEIGHT * Block.SIZE.toDouble()
 		}).apply {
+			scale.set(3.0, 3.0)
 			wheel(jso {
 				keyToPress = arrayOf("ShiftLeft")
 				smooth = 4
