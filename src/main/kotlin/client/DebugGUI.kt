@@ -7,7 +7,9 @@ import kotlinx.browser.window
 import math.rounded
 import pixi.externals.extensions.hide
 import pixi.typings.math.Point
+import pixi.typings.text.TextStyleAlign
 import pixi.typings.ticker.ticker
+import set
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object DebugGUI : Gui() {
@@ -23,13 +25,22 @@ object DebugGUI : Gui() {
 		addComponent(it, Point(0.0, 0.1))
 	}
 	
+	val levelInfo = text {
+		it.zIndex = 1001
+		addComponent(it, Point(0.0, 0.25))
+	}
+	
 	val selectedBlockText = text {
 		it.zIndex = 1001
-		addComponent(it, Point(0.8, 0.0))
+		it.anchor.set(1.0, 0.0)
+		addComponent(it, Point(1.0, 0.0))
+	}.also {
+		it.style.align = TextStyleAlign.RIGHT
 	}
 	
 	init {
 		if (window["debugCollisions"] != true) hide()
+		window["debugUI"] = this
 	}
 	
 	fun update() {
@@ -41,29 +52,32 @@ object DebugGUI : Gui() {
 			Frame Time: ${app.ticker.deltaMS.toString().take(2)}ms
 		""".trimIndent()
 		
+		val level = Game.level
+		val player = level.player
+		val aabbPlayer = player.getAABBBlocks()
 		playerText.text = """
-			inHorizontalCollision = ${Game.level.player.inHorizontalCollision}
-			onGround = ${Game.level.player.onGround}
-			x = ${Game.level.player.x}
-			y = ${Game.level.player.y}
-			blockX = ${Game.level.player.blockPos.x}
-			blockY = ${Game.level.player.blockPos.y}
-			velocityX = ${Game.level.player.velocity.x}
-			velocityY = ${Game.level.player.velocity.y}
-			gravity = ${Game.level.player.gravity}
-			AABB = ${Game.level.player.getAABBBlocks()}
-			top = ${Game.level.player.getAABBBlocks().top} left = ${Game.level.player.getAABBBlocks().left} right = ${Game.level.player.getAABBBlocks().right} bottom = ${Game.level.player.getAABBBlocks().bottom}
+			inHorizontalCollision = ${player.inHorizontalCollision}
+			onGround = ${player.onGround}
+			x = ${player.x} y = ${player.y}
+			blockX = ${player.blockPos.x} blockY = ${player.blockPos.y}
+			velocityX = ${player.velocity.x} velocityY = ${player.velocity.y}
+			gravity = ${player.gravity}
+			AABB = x:${aabbPlayer.x} y:${aabbPlayer.y} width:${aabbPlayer.width} height:${aabbPlayer.height}
+			top:${aabbPlayer.top} left:${aabbPlayer.left} right:${aabbPlayer.right} bottom:${aabbPlayer.bottom}
+		""".trimIndent()
+		
+		levelInfo.text = """
+			width = ${level.width}
+			height = ${level.height}
+			blocks = ${level.blockStates.size}
+			chunks = ${level.chunks.size}
 		""".trimIndent()
 		
 		val rect = Game.hoverBlock.blockState.getAABB(Game.hoverBlock.position)
 		selectedBlockText.text = """
-			x = ${Game.hoverBlock.x}
-			y = ${Game.hoverBlock.y}
-			top = ${rect.top}
-			bottom = ${rect.bottom}
-			left = ${rect.left}
-			right = ${rect.right}
+			x = ${Game.hoverBlock.x} y = ${Game.hoverBlock.y}
 			block = ${Game.hoverBlock.block.name}
+			chunk = ${level.getChunk(Game.hoverBlock.position)?.position?.run { "x: $x y: $y" } ?: ""}
 		""".trimIndent()
 	}
 }
