@@ -5,6 +5,7 @@ import blocks.Block
 import get
 import kotlinx.browser.window
 import level.Level
+import math.BlockPos
 import math.Direction
 import math.EPSILON
 import math.Vec2I
@@ -148,7 +149,7 @@ abstract class Entity : Sprite() {
 	
 	fun setPosition(blockPos: IPointData) = position.copyFrom(blockPos)
 	
-	fun setPosition(blockPos: Vec2I) = position.copyFrom((blockPos * Block.SIZE).toPoint())
+	fun setPosition(blockPos: BlockPos) = position.copyFrom((blockPos * Block.SIZE).toPoint())
 	
 	fun setTexture(name: String, width: Double? = null, height: Double? = null) {
 		texture = Texture.from("textures/$name.png")

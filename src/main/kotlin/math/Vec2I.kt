@@ -6,7 +6,7 @@ import pixi.typings.math.Point
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-data class Vec2I(var x: Int = 0, var y: Int = 0) {
+open class Vec2I(var x: Int = 0, var y: Int = 0) {
 	constructor(x: Number, y: Number) : this(x.toInt(), y.toInt())
 	constructor(point: Point) : this(point.x, point.y)
 	
@@ -65,6 +65,22 @@ data class Vec2I(var x: Int = 0, var y: Int = 0) {
 	fun toSave() = "$x,$y"
 	fun toPoint() = Point(x.toDouble(), y.toDouble())
 	fun west() = addX(-1)
+	
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (other !is Vec2I) return false
+		
+		if (x != other.x) return false
+		if (y != other.y) return false
+		
+		return true
+	}
+	
+	override fun hashCode(): Int {
+		var result = x
+		result = 31 * result + y
+		return result
+	}
 	
 	companion object {
 		val ZERO = Vec2I()

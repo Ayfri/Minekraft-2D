@@ -5,6 +5,8 @@ import blocks.Block
 import blocks.BlockState
 import entities.Player
 import math.AABB
+import math.BlockPos
+import math.ChunkPos
 import math.Vec2I
 import math.vec2i
 import math.x2
@@ -40,7 +42,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		chunks.forEach(Chunk::destroy)
 	}
 	
-	fun inLevel(blockPos: Vec2I) = blockPos.x in 0 until width && blockPos.y in 0 until height
+	fun inLevel(blockPos: BlockPos) = blockPos.x in 0 until width && blockPos.y in 0 until height
 	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
 	
 	fun generateWorld() {
@@ -100,7 +102,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun getBlocks(chunk: Chunk) = blockStates.slice(chunk.position.x * Chunk.SIZE * width..chunk.position.x * Chunk.SIZE * width + Chunk.SIZE * width)
 	
-	fun getChunk(blockPos: Vec2I) = getChunk(blockPos.x, blockPos.y)
+	fun getChunk(blockPos: BlockPos) = getChunk(blockPos.x, blockPos.y)
 	
 	fun getChunk(blockX: Int, blockY: Int): Chunk? {
 		val chunkX = blockX / Chunk.SIZE
@@ -109,12 +111,12 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.position.x == x && it.position.y == y }
-	fun getChunkAt(position: Vec2I) = chunks.firstOrNull { it.position == position }
+	fun getChunkAt(chunkPos: ChunkPos) = chunks.firstOrNull { it.position == chunkPos }
 	
-	fun getBlockState(blockPos: Vec2I) = blockStates[blockPos.x + blockPos.y * width]
+	fun getBlockState(blockPos: BlockPos) = blockStates[blockPos.x + blockPos.y * width]
 	fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
 	
-	fun getBlockStateOrNull(blockPos: Vec2I) = if (inLevel(blockPos)) getBlockState(blockPos) else null
+	fun getBlockStateOrNull(blockPos: BlockPos) = if (inLevel(blockPos)) getBlockState(blockPos) else null
 	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
 	
 	fun getTopPosition(x: Int): Int {
@@ -125,7 +127,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		return y - 1
 	}
 	
-	fun placeBlockState(blockPos: Vec2I, blockState: BlockState) = placeBlockState(blockPos.x, blockPos.y, blockState)
+	fun placeBlockState(blockPos: BlockPos, blockState: BlockState) = placeBlockState(blockPos.x, blockPos.y, blockState)
 	
 	fun placeBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) != BlockState.AIR) return
@@ -133,7 +135,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		renderChunkAtBlock(x, y)
 	}
 	
-	fun placeTree(blockPos: Vec2I) {
+	fun placeTree(blockPos: BlockPos) {
 		val trunk = BlockState(Block.LOG)
 		val leaves = BlockState(Block.LEAVES)
 		val treeHeight = Random.nextInt(5, 8)
@@ -164,18 +166,18 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		updateRender = true
 	}
 	
-	fun removeBlockState(blockPos: Vec2I) = setBlockState(blockPos, BlockState.AIR)
+	fun removeBlockState(blockPos: BlockPos) = setBlockState(blockPos, BlockState.AIR)
 	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
 	
 	fun renderAll() {
 		chunks.forEach(Chunk::render)
 	}
 	
-	fun renderChunkAt(chunkPos: Vec2I) = getChunkAt(chunkPos)?.render()
+	fun renderChunkAt(chunkPos: ChunkPos) = getChunkAt(chunkPos)?.render()
 	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
-	fun renderChunkAtBlock(blockPos: Vec2I) = getChunk(blockPos)?.render()
+	fun renderChunkAtBlock(blockPos: BlockPos) = getChunk(blockPos)?.render()
 	
-	fun setBlockState(blockPos: Vec2I, blockState: BlockState) = setBlockState(blockPos.x, blockPos.y, blockState)
+	fun setBlockState(blockPos: BlockPos, blockState: BlockState) = setBlockState(blockPos.x, blockPos.y, blockState)
 	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return

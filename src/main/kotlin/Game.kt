@@ -35,9 +35,9 @@ import pixi.typings.ticker.Ticker
 import pixi.typings.ticker.UPDATE_PRIORITY
 import pixi.typings.ticker.ticker
 import pixi.typings.utils.EventEmitter
-import pixi.utils.Application
 import pixi.utils.KeyMap
 import pixi.utils.MouseManager
+import pixi.utils.application
 import resources.GameProperties
 import resources.TextureManager
 import resources.parseGameProperties
@@ -111,7 +111,7 @@ object Game : EventEmitter() {
 	}
 	
 	fun init() {
-		app = Application {
+		app = application {
 			backgroundColor = Color(100, 180, 255)
 			resizeTo = window
 			resolution = window.devicePixelRatio

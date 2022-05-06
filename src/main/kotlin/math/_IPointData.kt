@@ -13,3 +13,6 @@ else apply {
 
 fun IPointData.toSave() = "$x,$y"
 fun IPointData.toVec2I() = Vec2I(x, y)
+fun IPointData.toBlockPos() = BlockPos(x, y)
+fun IPointData.toChunkPos() = ChunkPos(x, y)
+fun IPointData.toChunkLocalBlockPos() = ChunkLocalBlockPos(x, y)

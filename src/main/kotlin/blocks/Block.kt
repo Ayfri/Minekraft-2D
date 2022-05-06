@@ -4,7 +4,6 @@ import level.SaveBlock
 import pixi.typings.ListenerFn
 import pixi.typings.utils.EventEmitter
 
-
 open class Block(val name: String) : EventEmitter() {
 	var blocksLight = true
 	var collidable = true

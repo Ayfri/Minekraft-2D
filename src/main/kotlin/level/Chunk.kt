@@ -3,7 +3,8 @@ package level
 import Game
 import blocks.Block
 import kotlinx.js.jso
-import math.Vec2I
+import math.ChunkLocalBlockPos
+import math.ChunkPos
 import pixi.externals.extensions.collidesWith
 import pixi.externals.extensions.div
 import pixi.externals.extensions.plus
@@ -12,7 +13,7 @@ import pixi.externals.extensions.times
 import typings.tilemap.CompositeTilemap
 import kotlin.random.Random
 
-class Chunk(val level: Level, val position: Vec2I) {
+class Chunk(val level: Level, val position: ChunkPos) {
 	val blockUpdatesPerTick = 3
 	val tilemap = CompositeTilemap().also {
 		it.zIndex = 10
@@ -31,7 +32,7 @@ class Chunk(val level: Level, val position: Vec2I) {
 	
 	fun getAABB() = position.toPoint().times(SIZE * Block.SIZE)..position.toPoint().times(SIZE * Block.SIZE).plus(SIZE * Block.SIZE)
 	
-	fun getBlock(localPosition: Vec2I) = level.getBlockState(position * SIZE + localPosition)
+	fun getBlock(localBlockPos: ChunkLocalBlockPos) = level.getBlockState(position * SIZE + localBlockPos)
 	fun getBlock(localX: Int, localY: Int) = level.getBlockState(x * SIZE + localX, y * SIZE + localY)
 	
 	fun getBlockStates() = level.getBlocks(this)

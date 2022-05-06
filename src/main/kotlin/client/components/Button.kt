@@ -1,12 +1,11 @@
 package client.components
 
 import client.text
-import pixi.externals.extensions.DisplayObjectEvents
+import events.offPointerDown
+import events.onPointerDown
+import pixi.FederatedPointerEvent
 import pixi.externals.extensions.Rectangle
-import pixi.externals.extensions.off
-import pixi.externals.extensions.on
 import pixi.typings.core.Texture
-import pixi.typings.event.FederatedPointerEvent
 import pixi.typings.interaction.IHitArea
 import pixi.typings.interaction.buttonMode
 import pixi.typings.interaction.hitArea
@@ -30,9 +29,9 @@ open class Button(
 	
 	var onClick: (e: FederatedPointerEvent) -> Unit = {}
 		set(value) {
-			off(DisplayObjectEvents.pointerdown, field)
+			offPointerDown(field)
 			field = value
-			on(DisplayObjectEvents.pointerdown, field)
+			onPointerDown(field)
 		}
 	
 	
@@ -40,7 +39,7 @@ open class Button(
 		interactive = true
 		buttonMode = true
 		
-		on(DisplayObjectEvents.pointerdown, onClick)
+		onPointerDown(onClick)
 		addChild(label)
 	}
 	
