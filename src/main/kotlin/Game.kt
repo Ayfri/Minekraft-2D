@@ -8,9 +8,12 @@ import client.MenuGUI
 import client.PlayerInventory
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.js.jso
 import level.Level
 import level.LevelBlock
+import level.LevelBlocks
 import level.loadLevel
 import level.patchRawSave
 import level.toSave
@@ -46,6 +49,7 @@ import typings.viewport.Viewport
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()
 	val clientTicker = Ticker()
+	val coroutineScope = CoroutineScope(window.asCoroutineDispatcher())
 	val emptyTexture = Texture.from("textures/blocks/void.png")
 	var hoverBlock = LevelBlock(Block.AIR, Vec2I(0, 0))
 	val itemTextures = mutableMapOf<String, Texture<Resource>>()
@@ -96,6 +100,7 @@ object Game : EventEmitter() {
 	
 	fun preInit() {
 		parseGameProperties()
+		LevelBlocks.init()
 		Block.blocks.filter { it.visible }.forEach { TextureManager.addPreLoadBlock(it.name) }
 		TextureManager.addPreLoadBlock("air")
 		TextureManager.addPreLoad("background", "textures/background.png")
@@ -238,6 +243,9 @@ object Game : EventEmitter() {
 			if (!MenuGUI.visible) MenuGUI.show()
 			else MenuGUI.hide()
 		}
+		
+		LevelBlocks.saveBlockTypesToDB()
+		
 		clientTicker.start()
 		window.onresize = ::resize
 	}

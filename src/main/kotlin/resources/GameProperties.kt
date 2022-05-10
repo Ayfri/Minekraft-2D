@@ -30,7 +30,6 @@ class GameProperties : JsObject<String>() {
 	val version by "version"
 }
 
-
 fun parseGameProperties(filename: String = "properties.json") = window.fetch("./$filename").then {
 	it.json().then { result ->
 		console.log("Parsed game properties: ${result.stringify()}")

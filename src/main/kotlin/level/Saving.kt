@@ -1,6 +1,7 @@
 package level
 
 import Game
+import blocks.BlockState
 import entities.Entity
 import items.Item
 import items.ItemStack
@@ -25,21 +26,7 @@ fun Entity.toSave(): String {
 }
 
 fun Level.toSave(): String {
-	val blocks = mutableListOf<MutableList<Int>>()
-	val stateList = blockStates.distinct()
-	
-	var currentBlock = blockStates[0]
-	var currentCount = 0
-	blockStates.forEach {
-		if (it == currentBlock) {
-			currentCount++
-		} else {
-			blocks += mutableListOf(stateList.indexOf(currentBlock), currentCount)
-			currentBlock = it
-			currentCount = 1
-		}
-	}
-	blocks += mutableListOf(stateList.indexOf(currentBlock), currentCount)
+	val (blocks, stateList) = saveBlocks()
 	
 	val result = StringBuilder()
 	result.append("f:${Game.gameProperties.saveFormat}")
@@ -55,6 +42,25 @@ fun Level.toSave(): String {
 	result.append("s:${spawnPoint.toSave()}")
 	result.append("p:${player.toSave()}")
 	return result.toString()
+}
+
+fun Level.saveBlocks(): Pair<MutableList<MutableList<Int>>, List<BlockState>> {
+	val blocks = mutableListOf<MutableList<Int>>()
+	val stateList = blockStates.distinct()
+	
+	var currentBlock = blockStates[0]
+	var currentCount = 0
+	blockStates.forEach {
+		if (it == currentBlock) {
+			currentCount++
+		} else {
+			blocks += mutableListOf(stateList.indexOf(currentBlock), currentCount)
+			currentBlock = it
+			currentCount = 1
+		}
+	}
+	blocks += mutableListOf(stateList.indexOf(currentBlock), currentCount)
+	return Pair(blocks, stateList)
 }
 
 fun Item.toSave(): String {

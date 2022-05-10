@@ -100,7 +100,17 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		return aabbs
 	}
 	
-	fun getBlocks(chunk: Chunk) = blockStates.slice(chunk.position.x * Chunk.SIZE * width..chunk.position.x * Chunk.SIZE * width + Chunk.SIZE * width)
+	fun getBlocksStates(chunk: Chunk) : List<BlockState> {
+		val blocks = mutableListOf<BlockState>()
+		
+		for (x in chunk.xBlock until chunk.xBlockMax) {
+			for (y in chunk.yBlock until chunk.yBlockMax) {
+				blocks += getBlockState(x, y)
+			}
+		}
+		
+		return blocks
+	}
 	
 	fun getChunk(blockPos: BlockPos) = getChunk(blockPos.x, blockPos.y)
 	
@@ -110,8 +120,8 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		return getChunkAt(chunkX, chunkY)
 	}
 	
-	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.position.x == x && it.position.y == y }
-	fun getChunkAt(chunkPos: ChunkPos) = chunks.firstOrNull { it.position == chunkPos }
+	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.pos.x == x && it.pos.y == y }
+	fun getChunkAt(chunkPos: ChunkPos) = chunks.firstOrNull { it.pos == chunkPos }
 	
 	fun getBlockState(blockPos: BlockPos) = blockStates[blockPos.x + blockPos.y * width]
 	fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
@@ -125,6 +135,12 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 			y++
 		}
 		return y - 1
+	}
+	
+	fun setBlockStates(blocks: List<LevelBlock>) {
+		blocks.forEach { blockState ->
+			setBlockState(blockState.position, BlockState(blockState.block))
+		}
 	}
 	
 	fun placeBlockState(blockPos: BlockPos, blockState: BlockState) = placeBlockState(blockPos.x, blockPos.y, blockState)
@@ -203,7 +219,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	companion object {
-		const val HEIGHT = Chunk.SIZE * 18
-		const val WIDTH = Chunk.SIZE * 64
+		const val HEIGHT = Chunk.SIZE * 12
+		const val WIDTH = Chunk.SIZE * 32
 	}
 }

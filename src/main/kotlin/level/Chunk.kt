@@ -13,29 +13,38 @@ import pixi.externals.extensions.times
 import typings.tilemap.CompositeTilemap
 import kotlin.random.Random
 
-class Chunk(val level: Level, val position: ChunkPos) {
+class Chunk(val level: Level, val pos: ChunkPos) {
 	val blockUpdatesPerTick = 3
 	val tilemap = CompositeTilemap().also {
 		it.zIndex = 10
-		it.position.copyFrom(position.toPoint() * SIZE * Block.SIZE)
+		it.position.copyFrom(pos.toPoint() * SIZE * Block.SIZE)
 		it.cullable = true
 		Game.worldViewport.addChild(it)
 	}
 	var updateRender = false
 	
-	val x get() = position.x
-	val y get() = position.y
+	val x get() = pos.x
+	val y get() = pos.y
+	val xBlock get() = pos.x * SIZE
+	val yBlock get() = pos.y * SIZE
+	val xBlockMax get() = xBlock + SIZE
+	val yBlockMax get() = yBlock + SIZE
+	
+	@JsName("index")
+	val index get() = pos.x + pos.y * level.width
 	
 	fun destroy() {
 		tilemap.destroy(false)
 	}
 	
-	fun getAABB() = position.toPoint().times(SIZE * Block.SIZE)..position.toPoint().times(SIZE * Block.SIZE).plus(SIZE * Block.SIZE)
+	fun getAABB() = pos.toPoint().times(SIZE * Block.SIZE)..pos.toPoint().times(SIZE * Block.SIZE).plus(SIZE * Block.SIZE)
 	
-	fun getBlock(localBlockPos: ChunkLocalBlockPos) = level.getBlockState(position * SIZE + localBlockPos)
+	fun getBlock(localBlockPos: ChunkLocalBlockPos) = level.getBlockState(pos * SIZE + localBlockPos)
 	fun getBlock(localX: Int, localY: Int) = level.getBlockState(x * SIZE + localX, y * SIZE + localY)
 	
-	fun getBlockStates() = level.getBlocks(this)
+	fun getBlockStates() = level.getBlocksStates(this)
+	
+	fun toSave() = getBlockStates().map { Game.blockTextures.keys.indexOf(it.block.name) }
 	
 	fun isVisible(): Boolean {
 		val viewport = Game.worldViewport.getVisibleBounds().clone()

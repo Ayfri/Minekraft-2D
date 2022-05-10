@@ -1,16 +1,33 @@
 
 import kotlinext.js.require
 import kotlinx.browser.window
+import kotlinx.coroutines.launch
+import level.LevelBlocks
 import pixi.typings.app.Application
 import pixi.typings.constants.SCALE_MODES
 import pixi.typings.settings.settings
 
 lateinit var app: Application
 
-fun main() {
+suspend fun main() {
 	require("@pixi/tilemap")
 	require("@pixi/math-extras")
 	settings.SCALE_MODE = SCALE_MODES.NEAREST
 	window["game"] = Game
 	window.onload = { Game.emit("preInit") }
+	
+	window["test"] = {
+		LevelBlocks.saveChunksToDB(Game.level.chunks)
+	}
+	
+	window["test2"] = {
+		Game.coroutineScope.launch {
+			val blocks = LevelBlocks.getChunksFromDB(Game.level.chunks.map { it.pos })
+			console.log(blocks)
+			
+			blocks.forEach { (pos, blocks) ->
+				console.log(pos, blocks)
+			}
+		}
+	}
 }

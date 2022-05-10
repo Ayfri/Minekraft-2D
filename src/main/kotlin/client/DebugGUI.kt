@@ -77,7 +77,7 @@ object DebugGUI : Gui() {
 		selectedBlockText.text = """
 			x = ${Game.hoverBlock.x} y = ${Game.hoverBlock.y}
 			block = ${Game.hoverBlock.block.name}
-			chunk = ${level.getChunk(Game.hoverBlock.position)?.position?.run { "x: $x y: $y" } ?: ""}
+			chunk = ${level.getChunk(Game.hoverBlock.position)?.pos?.run { "x: $x y: $y" } ?: ""}
 		""".trimIndent()
 	}
 }
