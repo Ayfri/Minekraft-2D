@@ -13,6 +13,10 @@ import set
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object DebugGUI : Gui() {
+	init {
+		defaultStyle.lineHeight = 18.0
+	}
+	
 	val FPS= text {
 		it.zIndex = 1001
 		addComponent(it, Point(0.0, 0.05))
@@ -22,12 +26,12 @@ object DebugGUI : Gui() {
 	
 	val playerText = text {
 		it.zIndex = 1001
-		addComponent(it, Point(0.0, 0.1))
+		addComponent(it, Point(0.0, 0.12))
 	}
 	
 	val levelInfo = text {
 		it.zIndex = 1001
-		addComponent(it, Point(0.0, 0.25))
+		addComponent(it, Point(0.0, 0.3))
 	}
 	
 	val selectedBlockText = text {
@@ -67,13 +71,10 @@ object DebugGUI : Gui() {
 		""".trimIndent()
 		
 		levelInfo.text = """
-			width = ${level.width}
-			height = ${level.height}
-			blocks = ${level.blockStates.size}
+			blocks = w:${level.width}, h:${level.height} (${level.blockStates.size})
 			chunks = ${level.chunks.size}
 		""".trimIndent()
 		
-		val rect = Game.hoverBlock.blockState.getAABB(Game.hoverBlock.position)
 		selectedBlockText.text = """
 			x = ${Game.hoverBlock.x} y = ${Game.hoverBlock.y}
 			block = ${Game.hoverBlock.block.name}
