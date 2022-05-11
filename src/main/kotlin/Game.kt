@@ -121,6 +121,10 @@ object Game : EventEmitter() {
 			resizeTo = window
 			resolution = window.devicePixelRatio
 		}
+		app.view.style.apply {
+			width = "100%";
+			height = "100%";
+		}
 		app.addToBody()
 		clientTicker.add(UPDATE_PRIORITY.HIGH) { update() }
 		app.ticker.add(UPDATE_PRIORITY.HIGH) { uiUpdate() }
