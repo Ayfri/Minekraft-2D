@@ -23,14 +23,19 @@ import pixi.typings.sprite.Sprite
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+
 abstract class Entity : Sprite() {
 	open var canCollide = true
 	open var hasGravity = true
-	open var gravity = 0.25
-	var inHorizontalCollision = false
-	var onGround = false
+	open var gravity = 0.22
 	open val velocity = Point()
-	var maxVelocity = 10.0
+	open var maxVelocity = 10.0
+    open var jumpForce = 4.0
+	open var velocityForce = 0.5
+	var inHorizontalCollision = false
+	
+	var onGround = false
+	
 	private val graphics = Graphics().apply {
 		zIndex = 10000
 	}
@@ -134,7 +139,7 @@ abstract class Entity : Sprite() {
 	
 	open fun getAABB() = getLocalBounds().clone().move(x, y)
 	
-	open fun jump(force: Double = 3.0) {
+	open fun jump(force: Double = jumpForce) {
 		if (onGround) {
 			velocity.y = -force
 			position.y -= 1.0
@@ -142,7 +147,7 @@ abstract class Entity : Sprite() {
 		}
 	}
 	
-	fun move(direction: Direction, force: Double = 0.5) {
+	fun move(direction: Direction, force: Double = velocityForce) {
 		if (onGround) velocity.x = direction.x * force * 4.5
 		else velocity.x += direction.x * force * 0.4
 	}
@@ -159,7 +164,7 @@ abstract class Entity : Sprite() {
 		}
 	}
 	
-	open fun update() {
+	open fun update(deltaTime: Double) {
 		if (hasGravity) velocity.y += gravity
 		
 		velocity.x.coerceIn(-maxVelocity..maxVelocity).also { velocity.x = it }
@@ -189,7 +194,7 @@ abstract class Entity : Sprite() {
 		velocity.x *= if (onGround) 0.7 else 0.9
 		handleCollisions(Game.level)
 		
-		position += velocity
+		position += velocity.clone() * deltaTime
 	}
 	
 	companion object {

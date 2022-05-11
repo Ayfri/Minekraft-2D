@@ -8,6 +8,13 @@ import pixi.typings.core.IGenerateTextureOptions
 import pixi.typings.core.IRenderableObject
 import pixi.typings.core.RenderTexture
 import pixi.typings.core.Texture
+import pixi.typings.ticker.Ticker
+import pixi.typings.ticker.TickerCallback
+import pixi.typings.ticker.UPDATE_PRIORITY
+
+
+fun Ticker.add(priority: UPDATE_PRIORITY = UPDATE_PRIORITY.NORMAL, fn: (dt: Double) -> Unit) = add(fn.unsafeCast<TickerCallback<Any?>>(), null, priority)
+
 
 operator fun Window.set(key: String, value: Any?) {
 	asDynamic()[key] = value

@@ -24,7 +24,6 @@ import org.w3c.dom.events.Event
 import org.w3c.dom.get
 import org.w3c.dom.set
 import pixi.externals.Color
-import pixi.externals.extensions.add
 import pixi.externals.extensions.addToApplication
 import pixi.externals.extensions.addToBody
 import pixi.externals.extensions.on
@@ -126,8 +125,8 @@ object Game : EventEmitter() {
 			height = "100%";
 		}
 		app.addToBody()
-		clientTicker.add(UPDATE_PRIORITY.HIGH) { update() }
-		app.ticker.add(UPDATE_PRIORITY.HIGH) { uiUpdate() }
+		clientTicker.add(UPDATE_PRIORITY.HIGH) { a -> update(a) }
+		app.ticker.add(UPDATE_PRIORITY.HIGH) { _ -> uiUpdate() }
 		window["app"] = app
 		
 		background.apply {
@@ -268,8 +267,8 @@ object Game : EventEmitter() {
 		InGameGUI.update()
 	}
 	
-	fun update() {
-		level.player.update()
+	fun update(deltaTime: Double) {
+		level.player.update(deltaTime)
 		app.stage.sortChildren()
 		uiViewport.sortChildren()
 		worldViewport.sortChildren()

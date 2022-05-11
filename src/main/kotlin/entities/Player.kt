@@ -35,8 +35,8 @@ class Player : Entity() {
 		})
 	}
 	
-	override fun update() {
-		super.update()
+	override fun update(deltaTime: Double) {
+		super.update(deltaTime)
 		centerCamera()
 	}
 }
