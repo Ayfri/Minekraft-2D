@@ -1,8 +1,7 @@
 package resources
 
 import Game
-import kotlinext.js.asJsObject
-import kotlinext.js.getOwnPropertyNames
+import getOwnPropertyNames
 import kotlinx.browser.window
 import stringify
 import kotlin.reflect.KProperty
@@ -18,7 +17,7 @@ open class JsObject<V> {
 }
 
 fun <O : JsObject<V>, V> O.apply(obj: Any?): O {
-	(obj ?: return this).asJsObject().getOwnPropertyNames().forEach {
+	(obj ?: return this).getOwnPropertyNames().forEach {
 		this[it] = obj.asDynamic()[it].unsafeCast<V>()
 	}
 	return this
