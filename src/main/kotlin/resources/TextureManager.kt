@@ -1,6 +1,7 @@
 package resources
+
 import Game
-import kotlinext.js.getOwnPropertyNames
+import getOwnPropertyNames
 import pixi.typings.constants.SCALE_MODES
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture

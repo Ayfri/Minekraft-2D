@@ -1,3 +1,4 @@
+import kotlinx.js.Object
 import kotlinx.js.jso
 import org.w3c.dom.Window
 import pixi.externals.Color
@@ -21,6 +22,8 @@ operator fun Window.set(key: String, value: Any?) {
 }
 
 operator fun Window.get(key: String) = asDynamic()[key]
+
+fun Any.getOwnPropertyNames() = Object.getOwnPropertyNames(this)
 
 fun Any?.stringify(): String {
 	val cache = mutableListOf<Any?>()

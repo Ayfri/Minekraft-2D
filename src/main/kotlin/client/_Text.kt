@@ -12,4 +12,4 @@ val defaultStyle = jso<TextStyle> {
 
 fun Text() = Text("", defaultStyle)
 
-fun text(block: (Text) -> Unit) = Text().also(block)
+fun text(block: (Text) -> Unit) = Text("", defaultStyle).also(block)
