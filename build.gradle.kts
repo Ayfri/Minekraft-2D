@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 
 object Project {
-    const val pixiVersion = "0.5.1"
+    const val pixiVersion = "0.5.0"
 }
 
 plugins {
