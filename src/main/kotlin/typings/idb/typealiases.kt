@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package typings.idb
 
 import org.khronos.webgl.ArrayBuffer

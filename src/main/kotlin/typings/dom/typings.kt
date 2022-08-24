@@ -1,3 +1,5 @@
+@file:Suppress("unused", "FunctionName", "REDUNDANT_NULLABLE")
+
 package typings.dom
 
 import org.w3c.dom.WindowOrWorkerGlobalScope
@@ -85,7 +87,7 @@ external interface IDBVersionChangeEvent : Event {
 }
 
 inline val WindowOrWorkerGlobalScope.indexedDB
-	get() = asDynamic().indexedDB as IDBFactory
+	get() = asDynamic().indexedDB.unsafeCast<IDBFactory>()
 
 external interface IDBDatabaseInfo {
 	var name: String

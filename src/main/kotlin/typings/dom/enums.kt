@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package typings.dom
 
 import seskar.js.JsString

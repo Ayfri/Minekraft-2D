@@ -1,4 +1,5 @@
 @file:JsModule("@pixi/tilemap")
+@file:Suppress("unused")
 
 package typings.tilemap
 

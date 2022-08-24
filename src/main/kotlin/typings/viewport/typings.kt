@@ -1,4 +1,5 @@
 @file:JsModule("pixi-viewport")
+@file:Suppress("REDUNDANT_NULLABLE", "unused")
 
 package typings.viewport
 
