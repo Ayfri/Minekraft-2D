@@ -4,6 +4,7 @@
 package typings.idb
 
 import kotlinx.js.AsyncIterable
+import kotlinx.js.AsyncIterableIterator
 import kotlinx.js.ProxyHandler
 import kotlinx.js.WeakMap
 import typings.dom.*
@@ -240,16 +241,16 @@ external interface IDBPObjectStore<DBTypes : DBSchema?, TxStores : Array<StoreNa
 	fun openKeyCursor(query: StoreKey<DBTypes, StoreName>? = definedExternally, direction: IDBCursorDirection = definedExternally): Promise<IDBPCursor<DBTypes, TxStores, StoreName, *, Mode>?>
 	fun openKeyCursor(query: IDBKeyRange? = definedExternally, direction: IDBCursorDirection = definedExternally): Promise<IDBPCursor<DBTypes, TxStores, StoreName, *, Mode>?>
 	
-	operator fun iterator(): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
+	operator fun iterator(): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
 	fun iterate(
 		query: StoreKey<DBTypes, StoreName>? = definedExternally,
 		direction: IDBCursorDirection = definedExternally
-	): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
+	): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
 	
 	fun iterate(
 		query: IDBKeyRange? = definedExternally,
 		direction: IDBCursorDirection = definedExternally
-	): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
+	): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
 }
 
 @Suppress("INTERFACE_WITH_SUPERCLASS")
@@ -280,16 +281,16 @@ external interface IDBPIndex<DBTypes : DBSchema?, TxStores : Array<StoreNames<DB
 	
 	fun openKeyCursor(query: IDBKeyRange? = definedExternally, direction: IDBCursorDirection = definedExternally): Promise<IDBPCursor<DBTypes, TxStores, StoreName, *, Mode>?>
 	
-	operator fun iterator(): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
+	operator fun iterator(): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
 	fun iterate(
 		query: IndexKey<DBTypes, StoreName, IndexName>? = definedExternally,
 		direction: IDBCursorDirection = definedExternally
-	): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
+	): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
 	
 	fun iterate(
 		query: IDBKeyRange? = definedExternally,
 		direction: IDBCursorDirection = definedExternally
-	): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
+	): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, *, Mode>>
 }
 
 @Suppress("INTERFACE_WITH_SUPERCLASS")
@@ -307,7 +308,7 @@ external interface IDBPCursor<DBTypes : DBSchema?, TxStores : Array<StoreNames<D
 	fun <T> `continue`(`this`: T, key: CursorKey<DBTypes, StoreName, IndexName>): Promise<T?>
 	fun <T> continuePrimaryKey(`this`: T, key: StoreKey<DBTypes, StoreName>, primaryKey: StoreKey<DBTypes, StoreName>): Promise<T?>
 	
-	operator fun iterator(): AsyncIterable.Iterator<IDBPCursorIteratorValue<DBTypes, TxStores, StoreName, IndexName, Mode>>
+	operator fun iterator(): AsyncIterableIterator<IDBPCursorIteratorValue<DBTypes, TxStores, StoreName, IndexName, Mode>>
 }
 
 @Suppress("INTERFACE_WITH_SUPERCLASS")
@@ -334,7 +335,7 @@ external interface IDBPCursorWithValue<
 	val value: StoreValue<DBTypes, StoreName>
 	
 	@Suppress("RETURN_TYPE_MISMATCH_ON_OVERRIDE")
-	override operator fun iterator(): AsyncIterable.Iterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, IndexName, Mode>>
+	override operator fun iterator(): AsyncIterableIterator<IDBPCursorWithValueIteratorValue<DBTypes, TxStores, StoreName, IndexName, Mode>>
 }
 
 @Suppress("INTERFACE_WITH_SUPERCLASS")

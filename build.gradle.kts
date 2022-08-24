@@ -28,9 +28,9 @@ dependencies {
     implementation("io.github.ayfri:PIXI-Kotlin-pixi:${Project.pixiVersion}")
     implementation("io.github.ayfri:PIXI-Kotlin-events:${Project.pixiVersion}")
     implementation("io.github.ayfri:PIXI-Kotlin-math-extras:${Project.pixiVersion}")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-js:1.0.0-pre.374")
+    implementation("org.jetbrains.kotlin-wrappers:kotlin-js:1.0.0-pre.365")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
-    implementation(npm("@pixi/tilemap", "3.2.1"))
+    implementation(npm("@pixi/tilemap", "3.2.2"))
     implementation(npm("pixi-viewport", "4.34.4"))
     implementation(npm("idb", "7.0.1"))
 }
