@@ -8,3 +8,6 @@ operator fun Rectangle.contains(vec: Vec2I) = vec.x.toDouble() in left..right &&
 
 val Rectangle.x2 get() = x + width
 val Rectangle.y2 get() = y + height
+
+fun Rectangle.print() = "(x:$x, y:$y) -> (w:$width, h:$height)"
+fun Rectangle.printBounds() = "(t:$top, l:$left, b:$bottom, r:$right)"

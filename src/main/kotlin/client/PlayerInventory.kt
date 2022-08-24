@@ -55,7 +55,7 @@ object PlayerInventory : Inventory() {
 			
 			val itemStack = this[i]
 			if (itemStack.isAir) continue
-			val texture = itemStack.item.getTexture() ?: continue
+			val texture = itemStack.item.getTexture()
 			
 			sprites[i].texture = texture
 			sprites[i].position.set(i * SLOT_SIZE + ITEM_OFFSET, ITEM_OFFSET)

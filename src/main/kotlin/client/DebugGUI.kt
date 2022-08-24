@@ -4,6 +4,7 @@ import Game
 import app
 import get
 import kotlinx.browser.window
+import math.printBounds
 import math.rounded
 import pixi.externals.extensions.hide
 import pixi.typings.math.Point
@@ -17,7 +18,7 @@ object DebugGUI : Gui() {
 		defaultStyle.lineHeight = 18.0
 	}
 	
-	val FPS= text {
+	val FPS = text {
 		it.zIndex = 1001
 		addComponent(it, Point(0.0, 0.05))
 	}
@@ -49,7 +50,7 @@ object DebugGUI : Gui() {
 	
 	fun update() {
 		fpsValues.add(app.ticker.FPS)
-		if (fpsValues.size > 60) fpsValues.removeAt(0)
+		if (fpsValues.size > app.ticker.FPS) fpsValues.removeAt(0)
 		
 		FPS.text = """
 			FPS: ${fpsValues.average().rounded(2)}
@@ -73,12 +74,23 @@ object DebugGUI : Gui() {
 		levelInfo.text = """
 			blocks = w:${level.width}, h:${level.height} (${level.blockStates.size})
 			chunks = ${level.chunks.size}
+			debug = Chunks: ${window["debugChunks"].toString().toBoolean()}; Collisions: ${window["debugCollisions"].toString().toBoolean()}
+			viewport = ${
+			Game.worldViewport.run {
+				val c = corner
+				"x:${c.x} y:${c.y} x2:${c.x + screenWidth} y2:${c.y + screenHeight}"
+			}
+		}
+			screen = x:${app.screen.width} y:${app.screen.height}
 		""".trimIndent()
 		
+		val chunk = level.getChunk(Game.hoverBlock.position)
 		selectedBlockText.text = """
 			x = ${Game.hoverBlock.x} y = ${Game.hoverBlock.y}
 			block = ${Game.hoverBlock.block.name}
-			chunk = ${level.getChunk(Game.hoverBlock.position)?.pos?.run { "x: $x y: $y" } ?: ""}
+			chunk = ${chunk?.pos?.run { "x: $x y: $y" } ?: ""}
+			chunkAABB = ${chunk?.getAABB()?.printBounds()}
+			chunkVisibleAABB = ${chunk?.getVisibleAABB()?.printBounds()}
 		""".trimIndent()
 	}
 }
