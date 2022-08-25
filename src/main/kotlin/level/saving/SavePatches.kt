@@ -1,6 +1,8 @@
-package level
+package level.saving
 
 import Game
+import level.Level
+import level.loading.getFormat
 import kotlin.random.Random
 
 fun patchRawSave(save: String): String {

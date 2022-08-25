@@ -1,4 +1,3 @@
-
 import blocks.Block
 import blocks.BlockState
 import client.DebugGUI
@@ -11,12 +10,13 @@ import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.js.jso
+import kotlinx.js.performance
 import level.Level
 import level.LevelBlock
 import level.LevelBlocks
-import level.loadLevel
-import level.patchRawSave
-import level.toSave
+import level.loading.loadLevel
+import level.saving.patchRawSave
+import level.saving.toSave
 import math.Direction
 import math.Vec2I
 import math.toVec2I
@@ -121,8 +121,8 @@ object Game : EventEmitter() {
 			resolution = window.devicePixelRatio
 		}
 		app.view.style.apply {
-			width = "100%";
-			height = "100%";
+			width = "100%"
+			height = "100%"
 		}
 		app.addToBody()
 		clientTicker.add(UPDATE_PRIORITY.HIGH) { a -> update(a) }
@@ -160,6 +160,7 @@ object Game : EventEmitter() {
 	fun postInit() {
 		document.addEventListener("contextmenu", Event::preventDefault)
 		level = Level()
+		level.blockStates += Block.blocks.map { BlockState(it) }
 		level.generateWorld()
 		level.setRandomSpawnPoint()
 		
@@ -213,8 +214,18 @@ object Game : EventEmitter() {
 			window["debugCollisions"] = !window["debugCollisions"].toString().toBoolean()
 		}
 		
+		keyMap.keyboardManager.onPress("p") {
+			window["debugChunks"] = !window["debugChunks"].toString().toBoolean()
+			level.renderVisible()
+		}
+		
 		keyMap.onPress("save") {
 			window.localStorage["level"] = level.toSave()
+			console.log("Saved level !")
+		}
+		
+		worldViewport.on("zoomed") {
+			level.renderVisible()
 		}
 		
 		keyMap.onPress("load") {

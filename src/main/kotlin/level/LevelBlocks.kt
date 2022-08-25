@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.js.jso
+import level.saving.SaveBlock
 import math.ChunkPos
 import typings.idb.DBSchema
 import typings.idb.deleteDB

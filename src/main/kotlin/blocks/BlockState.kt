@@ -31,6 +31,8 @@ data class BlockState(var block: Block) {
 		return true
 	}
 	
+	fun indexIn(level: Level) = level.blockStates.indexOfFirst { it == this }
+	
 	fun getNeighbor(level: Level, pos: Vec2I, direction: Direction) = level.getBlockStateOrNull(pos.x + direction.x, pos.y + direction.y)
 	
 	fun getAABB(pos: Vec2I) = AABB(pos.x, pos.y, 1, 1)

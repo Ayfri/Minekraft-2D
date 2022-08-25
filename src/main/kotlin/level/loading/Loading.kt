@@ -1,17 +1,29 @@
-package level
+package level.loading
 
+import Couple
 import blocks.Block
 import blocks.BlockState
 import entities.Entity
 import entities.Player
+import items.AirItem.block
 import kotlinx.js.console
+import level.Chunk
+import level.Level
+import level.prettyPrint
+import level.saving.SaveBlock
+import level.saving.patchLevel
+import math.ChunkPos
 import math.Vec2I
 import pixi.typings.math.Point
+import stringify
+import kotlin.math.pow
 
 fun getFormat(save: String) = save.substring(save.indexOf("f:") + 2, save.indexOf("sd:")).toIntOrNull() ?: -1
 
 fun loadLevel(save: String): Level {
-	val blocks = mutableListOf<MutableList<Int>>()
+	val oldBlocks = mutableListOf<Couple<Int>>()
+	val blocksData = mutableListOf<Pair<ChunkPos, List<Couple<Int>>>>()
+	
 	val format = getFormat(save)
 	var height = 0
 	val spawnPoint = Vec2I.ZERO
@@ -26,7 +38,6 @@ fun loadLevel(save: String): Level {
 	var inSpawnPoint = false
 	var inValue = false
 	
-	
 	for ((index, c) in save.withIndex()) {
 		when (c) {
 			':' -> {
@@ -37,6 +48,7 @@ fun loadLevel(save: String): Level {
 				subString = ""
 				continue
 			}
+			
 			',' -> {
 				value += subString
 				subString = ""
@@ -46,6 +58,7 @@ fun loadLevel(save: String): Level {
 					continue
 				}
 			}
+			
 			'b' -> {
 				if (save[index + 1] == ':') {
 					seed = subString.toIntOrNull() ?: 0
@@ -55,12 +68,25 @@ fun loadLevel(save: String): Level {
 					continue
 				}
 			}
+			
 			'v' -> {
 				if (inBlocks && save[index + 1] == ':') {
 					value += subString
-					val list = value.split(",").map(String::toInt).windowed(2, 2, true)
-					list.forEach {
-						blocks += it.toList().toMutableList()
+					
+					if (format < 5) {
+						oldLoadingBlocksData(value, oldBlocks)
+					} else {
+						blocksData += value.split(";").drop(1).map { it.split(",") }.map { chunkData ->
+							val chunkPos = chunkData.take(2).let { ChunkPos(it[0].toInt(), it[1].toInt()) }
+							
+							val block = chunkData.drop(2).map {
+								it.toIntOrNull() ?: 0
+							}.windowed(2, 2).map {
+								Couple(it[0], it[1])
+							}
+							
+							return@map chunkPos to block
+						}
 					}
 					
 					inBlocks = false
@@ -70,6 +96,7 @@ fun loadLevel(save: String): Level {
 					continue
 				}
 			}
+			
 			'h' -> {
 				if (save[index + 1] == ':') {
 					value += subString
@@ -82,6 +109,7 @@ fun loadLevel(save: String): Level {
 					continue
 				}
 			}
+			
 			'w' -> {
 				if (save[index + 1] == ':') {
 					height = subString.toInt()
@@ -89,6 +117,7 @@ fun loadLevel(save: String): Level {
 					continue
 				}
 			}
+			
 			's' -> {
 				if (save[index + 1] == ':') {
 					width = subString.toInt()
@@ -98,6 +127,7 @@ fun loadLevel(save: String): Level {
 					inSpawnPoint = true
 				}
 			}
+			
 			'p' -> {
 				if (save[index + 1] == ':') {
 					value += subString
@@ -112,17 +142,32 @@ fun loadLevel(save: String): Level {
 	}
 	
 	return Level(height, width).apply {
-		var index = 0
-		blocks.forEach {
-			val block = Block.fromSaveBlock(values[it[0]])
-			for (i in 0 until it[1]) {
-				blockStates[index] = BlockState(block)
-				index++
+		if (format < 5) {
+			oldLoading(oldBlocks, values)
+		} else {
+			values.forEach {
+				val block = Block.fromSaveBlock(it)
+				blockStates += BlockState(block)
+			}
+			
+			blocksData.forEachIndexed { index1, (pos, data) ->
+				getChunkAt(pos)?.let { chunk ->
+					val blocks = IntArray(Chunk.SIZE.unsafeCast<Double>().pow(2).unsafeCast<Int>())
+					var blockIndex = 0
+					data.forEach { (id, count) ->
+						repeat(count) {
+							blocks[blockIndex++] = id
+						}
+					}
+					
+					chunk.blockTable.array = blocks
+				}
 			}
 		}
-		this@apply.seed = seed
-		spawnPoint.copyFrom(spawnPoint)
-		this@apply.player = player
+		
+		this.seed = seed
+		this.spawnPoint.copyFrom(spawnPoint)
+		this.player = player
 		ticksTicker.start()
 		console.log("Loaded level")
 	}.let {
@@ -140,22 +185,26 @@ fun <T : Entity> fromSave(save: String, entity: T) {
 				subString = ""
 				return@forEachIndexed
 			}
+			
 			'g' -> {
 				if (save[index + 1] == ':') {
 					entity.blockPos = Point(subString)
 				}
 			}
+			
 			'v' -> {
 				if (save[index + 1] == ':') {
 					entity.gravity = subString.toDouble()
 					subString = ""
 				}
 			}
+			
 			'm' -> {
 				if (save[index + 1] == ':') {
 					entity.velocity.copyFrom(Point(subString))
 				}
 			}
+			
 			'f' -> {
 				if (save[index + 1] == ':') {
 					entity.maxVelocity = subString.toDouble()

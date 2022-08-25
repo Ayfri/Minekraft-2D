@@ -22,7 +22,6 @@ object MenuGUI : Gui() {
 			hide()
 		}
 	}.also {
-		console.log(it.width)
 		it.zIndex = 2200
 		addComponent(it, Point(0.5, 0.2))
 	}

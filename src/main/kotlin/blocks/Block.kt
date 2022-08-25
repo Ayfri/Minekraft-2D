@@ -1,6 +1,6 @@
 package blocks
 
-import level.SaveBlock
+import level.saving.SaveBlock
 import pixi.typings.ListenerFn
 import pixi.typings.utils.EventEmitter
 

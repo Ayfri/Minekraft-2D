@@ -17,7 +17,9 @@ suspend fun main() {
 	window.onload = { Game.emit("preInit") }
 	
 	window["test"] = {
-		LevelBlocks.saveChunksToDB(Game.level.chunks)
+		console.log(Game.level.getVisibleChunks(), Game.level.getNotVisibleChunks())
+		
+		LevelBlocks.saveChunksToDB(Game.level.getNotVisibleChunks())
 	}
 	
 	window["test2"] = {

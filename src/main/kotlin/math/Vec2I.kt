@@ -83,6 +83,7 @@ open class Vec2I(var x: Int = 0, var y: Int = 0) {
 	}
 	
 	override fun toString() = "Vec2I(x=$x, y=$y)"
+	operator fun rem(n: Int): Vec2I = Vec2I(x % n, y % n)
 	
 	companion object {
 		val ZERO = Vec2I()

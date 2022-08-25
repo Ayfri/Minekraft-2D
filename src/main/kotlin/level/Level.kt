@@ -19,10 +19,12 @@ import kotlin.random.Random
 
 
 class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
-	val blockStates = MutableList(height * width) { BlockState.AIR }
+	val blockStates = mutableSetOf(BlockState.AIR)
+	
 	val chunks = List((height / Chunk.SIZE) * (width / Chunk.SIZE)) {
 		Chunk(this, Vec2I(it % (width / Chunk.SIZE), it / (width / Chunk.SIZE)))
 	}
+	
 	var player = Player()
 	var seed = Random.nextInt(Int.MAX_VALUE)
 		internal set
@@ -35,15 +37,30 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		ticksTicker.maxFPS = 20
 	}
 	
+	fun getBlockStateAt(x: Int, y: Int) = getChunk(x, y)!!.let {
+		it.getBlockStateAt(x % it.xBlock, y % it.yBlock)
+	}
+	
+	fun setBlockStateAt(x: Int, y: Int, state: BlockState) {
+		blockStates.add(state)
+		
+		getChunk(x, y)!!.let {
+			it.setBlockStateAt(x % it.xBlock, y % it.yBlock, state.indexIn(this))
+		}
+	}
+	
+	fun setBlockStateAsIndexAt(x: Int, y: Int, state: Int) {
+		getChunk(x, y)!!.let {
+			it.setBlockStateAt(x % it.xBlock, y % it.yBlock, state)
+		}
+	}
+	
 	fun destroy() {
 		ticksTicker.destroy()
 		player.destroy(false)
 		Game.worldViewport.plugins.remove("follow")
 		chunks.forEach(Chunk::destroy)
 	}
-	
-	fun inLevel(blockPos: BlockPos) = blockPos.x in 0 until width && blockPos.y in 0 until height
-	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
 	
 	fun generateWorld() {
 		val surfaceLayers = mutableListOf<Int>()
@@ -112,19 +129,23 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		return blocks
 	}
 	
-	fun getChunk(blockPos: BlockPos) = getChunk(blockPos.x, blockPos.y)
+	fun getVisibleChunks() = chunks.filter(Chunk::isVisible)
+	fun getNotVisibleChunks() = chunks.filterNot(Chunk::isVisible)
 	
-	fun getChunk(blockX: Int, blockY: Int): Chunk? {
-		val chunkX = blockX / Chunk.SIZE
-		val chunkY = blockY / Chunk.SIZE
-		return getChunkAt(chunkX, chunkY)
-	}
+	fun inLevel(blockPos: BlockPos) = blockPos.x in 0 until width && blockPos.y in 0 until height
+	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
+	
+	fun getChunk(blockX: Int, blockY: Int) = chunks.firstOrNull { it.contains(blockX, blockY) }
+	fun getChunk(blockPos: BlockPos) = chunks.firstOrNull { blockPos in it }
 	
 	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.pos.x == x && it.pos.y == y }
 	fun getChunkAt(chunkPos: ChunkPos) = chunks.firstOrNull { it.pos == chunkPos }
 	
-	fun getBlockState(blockPos: BlockPos) = blockStates[blockPos.x + blockPos.y * width]
-	fun getBlockState(x: Int, y: Int) = blockStates[x + y * width]
+	@Suppress("NOTHING_TO_INLINE")
+	inline fun getBlockState(blockPos: BlockPos) = getBlockStateAt(blockPos.x, blockPos.y)
+	
+	@Suppress("NOTHING_TO_INLINE")
+	inline fun getBlockState(x: Int, y: Int) = getBlockStateAt(x, y)
 	
 	fun getBlockStateOrNull(blockPos: BlockPos) = if (inLevel(blockPos)) getBlockState(blockPos) else null
 	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
@@ -147,7 +168,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun placeBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) != BlockState.AIR) return
-		blockStates[x + y * width] = blockState
+		setBlockState(x, y, blockState)
 		renderChunkAtBlock(x, y)
 	}
 	
@@ -189,6 +210,10 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		chunks.forEach(Chunk::render)
 	}
 	
+	fun renderVisible() {
+		chunks.filter(Chunk::isVisible).forEach(Chunk::render)
+	}
+	
 	fun renderChunkAt(chunkPos: ChunkPos) = getChunkAt(chunkPos)?.render()
 	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
 	fun renderChunkAtBlock(blockPos: BlockPos) = getChunk(blockPos)?.render()
@@ -197,7 +222,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
-		blockStates[x + y * width] = blockState
+		setBlockStateAt(x, y, blockState)
 		renderChunkAtBlock(x, y)
 	}
 	
@@ -209,7 +234,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	fun tick() {
-		chunks.forEach(Chunk::tick)
+		chunks.filter(Chunk::isVisible).forEach(Chunk::tick)
 	}
 	
 	fun tickBlockState(x: Int, y: Int) {
@@ -223,3 +248,9 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		const val WIDTH = Chunk.SIZE * 32
 	}
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <E> Set<E>.get(index: Int) = elementAt(index)
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <E> MutableSet<E>.plus(element: E) = add(element)

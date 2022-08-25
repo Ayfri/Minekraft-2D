@@ -1,19 +1,28 @@
 package level
 
 import Game
+import app
 import blocks.Block
+import blocks.BlockState
+import client.DebugGUI.getBounds
+import get
+import kotlinx.browser.window
 import kotlinx.js.jso
+import math.AABB
+import math.BlockPos
 import math.ChunkLocalBlockPos
 import math.ChunkPos
-import pixi.externals.extensions.collidesWith
-import pixi.externals.extensions.div
-import pixi.externals.extensions.plus
-import pixi.externals.extensions.rangeTo
+import pixi.externals.extensions.Rectangle
 import pixi.externals.extensions.times
+import pixi.typings.graphics.Graphics
+import pixi.typings.math.Point
 import typings.tilemap.CompositeTilemap
 import kotlin.random.Random
 
 class Chunk(val level: Level, val pos: ChunkPos) {
+	lateinit var tilemapSize: Point
+	val blockTable = BlockTableArray(SIZE)
+	
 	val blockUpdatesPerTick = 3
 	val tilemap = CompositeTilemap().also {
 		it.zIndex = 10
@@ -22,6 +31,10 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		Game.worldViewport.addChild(it)
 	}
 	var updateRender = false
+	
+	private val graphics = Graphics().apply {
+		zIndex = 15000
+	}
 	
 	val x get() = pos.x
 	val y get() = pos.y
@@ -33,30 +46,60 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 	@JsName("index")
 	val index get() = pos.x + pos.y * level.width
 	
+	operator fun contains(pos: BlockPos) = pos.x in xBlock until xBlockMax && pos.y in yBlock until yBlockMax
+	fun contains(x: Int, y: Int) = x in xBlock until xBlockMax && y in yBlock until yBlockMax
+	
+	fun getBlockStateAt(x: Int, y: Int) = level.blockStates[blockTable[x, y]]
+	fun setBlockStateAt(x: Int, y: Int, blockState: Int) {
+		blockTable[x, y] = blockState
+	}
+	
 	fun destroy() {
 		tilemap.destroy(false)
 	}
 	
-	fun getAABB() = pos.toPoint().times(SIZE * Block.SIZE)..pos.toPoint().times(SIZE * Block.SIZE).plus(SIZE * Block.SIZE)
+	fun getAABB(): AABB {
+		val result = getBounds().clone()
+		result * Block.SIZE
+		return result
+	}
 	
-	fun getBlock(localBlockPos: ChunkLocalBlockPos) = level.getBlockState(pos * SIZE + localBlockPos)
-	fun getBlock(localX: Int, localY: Int) = level.getBlockState(x * SIZE + localX, y * SIZE + localY)
+	fun getVisibleAABB(): AABB {
+		val position = Game.worldViewport.toScreen<Point>(tilemap.position)
+		
+		val size =
+			if (::tilemapSize.isInitialized) tilemapSize
+			else Point(tilemap.position.x + tilemap.width, tilemap.position.y + tilemap.height).also { tilemapSize = it }
+		val screenSize = Game.worldViewport.toScreen<Point>(size)
+		
+		return Rectangle(position, screenSize)
+	}
 	
-	fun getBlockStates() = level.getBlocksStates(this)
+	fun getBlock(localBlockPos: ChunkLocalBlockPos) = getBlockStateAt(localBlockPos.x, localBlockPos.y)
+	fun getBlock(localX: Int, localY: Int) = getBlockStateAt(localX, localY)
+	
+	fun getBlockStates() = blockTable.map { level.blockStates[it] }
+	
+	fun isVisible() = app.screen.intersects(getVisibleAABB())
 	
 	fun toSave() = getBlockStates().map { Game.blockTextures.keys.indexOf(it.block.name) }
-	
-	fun isVisible(): Boolean {
-		val viewport = Game.worldViewport.getVisibleBounds().clone()
-		viewport / Block.SIZE
-		return viewport collidesWith getAABB()
-	}
 	
 	fun tick() {
 		for (i in 0..blockUpdatesPerTick) {
 			val x = Random.nextInt(SIZE)
 			val y = Random.nextInt(SIZE)
 			level.tickBlockState(x, y)
+		}
+		
+		if (window["debugChunks"] == true) {
+			if (Game.worldViewport.children.none { it == graphics }) Game.worldViewport.addChild(graphics)
+			graphics.clear()
+			graphics.lineStyle(3.0, 0xFF8800)
+			if (isVisible()) graphics.lineStyle(4.0, 0x00FFFF)
+			
+			graphics.drawRect(x * SIZE * Block.SIZE.toDouble(), y * SIZE * Block.SIZE.toDouble(), SIZE * Block.SIZE.toDouble(), SIZE * Block.SIZE.toDouble())
+		} else {
+			if (Game.worldViewport.children.any { it == graphics }) Game.worldViewport.removeChild(graphics)
 		}
 	}
 	

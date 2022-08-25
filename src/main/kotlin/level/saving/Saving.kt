@@ -1,11 +1,17 @@
-package level
+package level.saving
 
+import Couple
 import Game
 import blocks.BlockState
 import entities.Entity
 import items.Item
 import items.ItemStack
+import level.Chunk
+import level.Level
+import level.prettyPrint
+import math.ChunkPos
 import math.toSave
+import stringify
 
 data class SaveBlock(var n: String = "")
 
@@ -31,7 +37,9 @@ fun Level.toSave(): String {
 	val result = StringBuilder()
 	result.append("f:${Game.gameProperties.saveFormat}")
 	result.append("sd:${seed}")
-	result.append(blocks.flatten().joinToString(",", "b:", transform = Int::toString))
+	result.append(blocks.joinToString("", "b:") { (pos, chunkData) ->
+		chunkData.joinToString(",", ";${pos.toSave()},") { "${it.first},${it.second}" }
+	})
 	result.append("v:")
 	stateList.map { it.toJSON() }.forEach {
 		result.append(it.n)
@@ -44,24 +52,17 @@ fun Level.toSave(): String {
 	return result.toString()
 }
 
-fun Level.saveBlocks(): Pair<MutableList<MutableList<Int>>, List<BlockState>> {
-	val blocks = mutableListOf<MutableList<Int>>()
-	val stateList = blockStates.distinct()
-	
-	var currentBlock = blockStates[0]
-	var currentCount = 0
-	blockStates.forEach {
-		if (it == currentBlock) {
-			currentCount++
-		} else {
-			blocks += mutableListOf(stateList.indexOf(currentBlock), currentCount)
-			currentBlock = it
-			currentCount = 1
+fun Level.saveBlocks() = Pair(chunks.map(Chunk::saveData), blockStates)
+
+fun Chunk.saveData() =
+	Pair(pos, blockTable.array.asSequence().fold(mutableSetOf<IntArray>()) { acc, block ->
+		acc.apply {
+			if (isEmpty() || last()[0] != block) add(intArrayOf(block, 1))
+			else last()[1]++
 		}
-	}
-	blocks += mutableListOf(stateList.indexOf(currentBlock), currentCount)
-	return Pair(blocks, stateList)
-}
+	}.map {
+		it[0] to it[1]
+	}.toList())
 
 fun Item.toSave(): String {
 	val result = StringBuilder("n:$name")
