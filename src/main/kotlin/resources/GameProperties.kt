@@ -1,9 +1,9 @@
 package resources
 
 import Game
-import getOwnPropertyNames
+import utils.getOwnPropertyNames
 import kotlinx.browser.window
-import stringify
+import utils.stringify
 import kotlin.reflect.KProperty
 
 @Suppress("NOTHING_TO_INLINE")

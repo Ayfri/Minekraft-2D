@@ -3,12 +3,12 @@ package client
 import Game
 import app
 import client.components.button
-import generateBlankTexture
 import kotlinx.browser.window
 import pixi.externals.BLACK
 import pixi.externals.Color
 import pixi.typings.math.Point
 import pixi.typings.sprite.Sprite
+import utils.generateBlankTexture
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object MenuGUI : Gui() {

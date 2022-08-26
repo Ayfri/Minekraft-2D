@@ -2,7 +2,6 @@ package entities
 
 import Game
 import blocks.Block
-import get
 import kotlinx.browser.window
 import level.Level
 import math.BlockPos
@@ -20,6 +19,7 @@ import pixi.typings.graphics.Graphics
 import pixi.typings.math.IPointData
 import pixi.typings.math.Point
 import pixi.typings.sprite.Sprite
+import utils.get
 import kotlin.math.abs
 import kotlin.math.roundToInt
 

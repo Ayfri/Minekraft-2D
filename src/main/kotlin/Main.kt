@@ -6,6 +6,7 @@ import level.LevelBlocks
 import pixi.typings.app.Application
 import pixi.typings.constants.SCALE_MODES
 import pixi.typings.settings.settings
+import utils.set
 
 lateinit var app: Application
 

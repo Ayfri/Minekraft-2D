@@ -1,6 +1,6 @@
-import kotlinx.js.Object
+package utils
+
 import kotlinx.js.jso
-import org.w3c.dom.Window
 import pixi.externals.Color
 import pixi.externals.extensions.Sprite
 import pixi.externals.extensions.color
@@ -14,29 +14,9 @@ import pixi.typings.ticker.Ticker
 import pixi.typings.ticker.TickerCallback
 import pixi.typings.ticker.UPDATE_PRIORITY
 
-
 typealias Couple<T> = Pair<T, T>
 
 fun Ticker.add(priority: UPDATE_PRIORITY = UPDATE_PRIORITY.NORMAL, fn: (dt: Double) -> Unit) = add(fn.unsafeCast<TickerCallback<Any?>>(), null, priority)
-
-operator fun Window.set(key: String, value: Any?) {
-	asDynamic()[key] = value
-}
-
-operator fun Window.get(key: String) = asDynamic()[key]
-
-fun Any.getOwnPropertyNames() = Object.getOwnPropertyNames(this)
-
-fun Any?.stringify(): String {
-	val cache = mutableListOf<Any?>()
-	return JSON.stringify(this, replacer@{ _: String, value: Any? ->
-		if (jsTypeOf(value) == "object" && value !== null) {
-			if (value in cache) return@replacer null
-			cache += value
-		}
-		value
-	}, 4)
-}
 
 inline fun iPointData(block: IPointData.() -> Unit) = jso<IPointData> {}.apply(block)
 
@@ -47,7 +27,6 @@ class GenerateBlankTextureOptions {
 	var resolution: Double? = null
 	var width: Number? = null
 }
-
 
 fun generateBlankTexture(options: (GenerateBlankTextureOptions) -> Unit): RenderTexture {
 	val opts = GenerateBlankTextureOptions().also(options)

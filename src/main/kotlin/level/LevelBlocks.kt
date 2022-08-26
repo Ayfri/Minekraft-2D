@@ -34,7 +34,6 @@ object LevelBlocks : CoroutineScope {
 	
 	fun decodeBlocks(blocks: List<SaveBlock>, chunk: Chunk) = blocks.map { BlockState(Block.fromSaveBlock(it)) }
 	
-	
 	suspend fun getChunkFromDB(position: ChunkPos): List<SaveBlock>? {
 		val blocks = getDB().get(CHUNKS_STORE, position.toSave())
 		val values = getDB().get(BLOCKS_STORE, "types")
@@ -94,7 +93,6 @@ object LevelBlocks : CoroutineScope {
 		val promises = mutableListOf<Promise<*>>()
 		data.forEach { (key, value) ->
 			val put = tx.store?.put
-			
 			put.asDynamic().call(tx.store, value, key).unsafeCast<Unit>()
 		}
 		

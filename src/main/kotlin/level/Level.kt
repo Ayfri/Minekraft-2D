@@ -38,19 +38,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	
-	fun setBlockStateUnsafe(x: Int, y: Int, state: BlockState) {
-		blockStates.add(state)
-		
-		getChunkFromBlockPos(x, y)!!.let {
-			it.setBlockState(x % it.xBlock, y % it.yBlock, state.indexIn(this))
-		}
-	}
-	
-	fun setBlockStateUnsafeAsIndex(x: Int, y: Int, state: Int) {
-		getChunkFromBlockPos(x, y)!!.let {
-			it.setBlockState(x % it.xBlock, y % it.yBlock, state)
-		}
-	}
 	
 	fun destroy() {
 		ticksTicker.destroy()
@@ -200,6 +187,20 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		if (getBlockState(x, y) == blockState) return
 		setBlockStateUnsafe(x, y, blockState)
 		renderChunkAtBlock(x, y)
+	}
+	
+	fun setBlockStateUnsafe(x: Int, y: Int, state: BlockState) {
+		blockStates.add(state)
+		
+		getChunkFromBlockPos(x, y)!!.let {
+			it.setBlockState(x % it.xBlock, y % it.yBlock, state.indexIn(this))
+		}
+	}
+	
+	fun setBlockStateUnsafeAsIndex(x: Int, y: Int, state: Int) {
+		getChunkFromBlockPos(x, y)!!.let {
+			it.setBlockState(x % it.xBlock, y % it.yBlock, state)
+		}
 	}
 	
 	fun setRandomSpawnPoint() {

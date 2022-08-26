@@ -1,6 +1,6 @@
 package level
 
-import iPointData
+import utils.iPointData
 import kotlin.math.sqrt
 
 class BlockTableArray(val x: Int, val y: Int) {

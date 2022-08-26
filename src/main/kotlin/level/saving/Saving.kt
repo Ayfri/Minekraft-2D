@@ -1,17 +1,12 @@
 package level.saving
 
-import Couple
 import Game
-import blocks.BlockState
 import entities.Entity
 import items.Item
 import items.ItemStack
 import level.Chunk
 import level.Level
-import level.prettyPrint
-import math.ChunkPos
 import math.toSave
-import stringify
 
 data class SaveBlock(var n: String = "")
 

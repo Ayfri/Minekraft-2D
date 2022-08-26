@@ -1,11 +1,11 @@
 package level.loading
 
-import Couple
 import blocks.Block
 import blocks.BlockState
 import level.BlockTableArray
 import level.Level
 import level.saving.SaveBlock
+import utils.Couple
 
 fun Level.oldLoading(blocks: List<Couple<Int>>, values: List<SaveBlock>) {
 	var numberOfBlocks = 0

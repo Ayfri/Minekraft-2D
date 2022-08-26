@@ -2,7 +2,6 @@ package client
 
 import Game
 import app
-import get
 import kotlinx.browser.window
 import math.printBounds
 import math.rounded
@@ -10,7 +9,8 @@ import pixi.externals.extensions.hide
 import pixi.typings.math.Point
 import pixi.typings.text.TextStyleAlign
 import pixi.typings.ticker.ticker
-import set
+import utils.get
+import utils.set
 
 @Suppress("JS_FAKE_NAME_CLASH")
 object DebugGUI : Gui() {

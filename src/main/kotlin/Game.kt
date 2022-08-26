@@ -43,6 +43,8 @@ import resources.GameProperties
 import resources.TextureManager
 import resources.parseGameProperties
 import typings.viewport.Viewport
+import utils.add
+import utils.set
 
 object Game : EventEmitter() {
 	val blockTextures = mutableMapOf<String, Texture<Resource>>()

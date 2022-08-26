@@ -1,12 +1,12 @@
 package resources
 
 import Game
-import getOwnPropertyNames
 import pixi.typings.constants.SCALE_MODES
 import pixi.typings.core.Resource
 import pixi.typings.core.Texture
 import pixi.typings.loaders.Loader
 import pixi.typings.utils.EventEmitter
+import utils.getOwnPropertyNames
 
 object TextureManager : EventEmitter() {
 	private val textures = mutableMapOf<String, Texture<*>>()
