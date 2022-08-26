@@ -5,14 +5,12 @@ import blocks.Block
 import pixi.typings.utils.EventEmitter
 
 open class Item(val name: String) : EventEmitter() {
-	
 	open val asBlock get() = this as ItemBlock
-	
 	open val isBlock get() = this is ItemBlock
 	
-	open fun getTexture() = Game.itemTextures[name] ?: Game.emptyTexture
+	open val texture= Game.itemTextures[name] ?: Game.emptyTexture
 	
-	fun register() {
+	open fun register() {
 		console.log("Registering item: $name")
 		items += this
 	}

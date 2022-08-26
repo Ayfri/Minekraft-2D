@@ -4,7 +4,6 @@ import Game
 import app
 import blocks.Block
 import client.DebugGUI.getBounds
-import get
 import kotlinx.browser.window
 import kotlinx.js.jso
 import math.AABB
@@ -15,6 +14,7 @@ import pixi.externals.extensions.times
 import pixi.typings.graphics.Graphics
 import pixi.typings.math.Point
 import typings.tilemap.CompositeTilemap
+import utils.get
 import kotlin.random.Random
 
 class Chunk(val level: Level, val pos: ChunkPos) {
@@ -74,7 +74,6 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 	
 	fun isVisible() = app.screen.intersects(getVisibleAABB())
 	
-	fun toSave() = getBlockStates().map { Game.blockTextures.keys.indexOf(it.block.name) }
 	
 	fun tick() {
 		for (i in 0..blockUpdatesPerTick) {
@@ -95,13 +94,15 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		}
 	}
 	
+	fun toSave() = getBlockStates().map { Game.blockTextures.keys.indexOf(it.block.name) }
+	
 	fun render() {
 		if (!updateRender) return
 		tilemap.clear()
 		
 		for (x in 0 until SIZE) {
 			for (y in 0 until SIZE) {
-				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: Game.emptyTexture, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
+				tilemap.tile(getBlockState(x, y).block.getTexture(), x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
 					tileHeight = Block.SIZE
 					tileWidth = Block.SIZE
 				})

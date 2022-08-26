@@ -1,16 +1,24 @@
 package blocks
 
+import Game
 import level.saving.SaveBlock
 import pixi.typings.ListenerFn
 import pixi.typings.utils.EventEmitter
+import utils.LazyMutable
 
 open class Block(val name: String) : EventEmitter() {
+	private var texture by LazyMutable {
+		Game.blockTextures.getOrElse(name) { Game.emptyTexture }
+	}
+	
 	var blocksLight = true
 	var collidable = true
 	var tickable = false
 	var visible = true
 	
 	val isAir get() = this is AirBlock
+	
+	fun getTexture() = texture
 	
 	fun register() {
 		console.log("Registering block: $name")
