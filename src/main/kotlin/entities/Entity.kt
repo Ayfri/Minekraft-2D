@@ -27,11 +27,11 @@ import kotlin.math.roundToInt
 abstract class Entity : Sprite() {
 	open var canCollide = true
 	open var hasGravity = true
-	open var gravity = 0.22
+	open var gravity = .385
 	open val velocity = Point()
-	open var maxVelocity = 10.0
+	open var maxVelocity = 1.0
     open var jumpForce = 4.0
-	open var velocityForce = 0.5
+	open var velocityForce = .5
 	var inHorizontalCollision = false
 	
 	var onGround = false
@@ -61,7 +61,7 @@ abstract class Entity : Sprite() {
 	val type get() = this::class.simpleName
 	
 	init {
-		anchor.set(0.5)
+		anchor.set(.5)
 		zIndex = 100
 	}
 	
@@ -86,38 +86,38 @@ abstract class Entity : Sprite() {
 				val block = level.getBlockStateOrNull(blockX, blockY) ?: continue
 				if (!block.block.collidable) continue
 				
-				graphics.lineStyle(0.5, 0xFF0000)
+				graphics.lineStyle(.5, 0xFF0000)
 				
 				val blockAABB = block.getAABB(Vec2I(blockX, blockY))
 				
 				if (blockAABB.intersects(nextAABB)) {
-					graphics.lineStyle(0.6, 0x00FF00)
+					graphics.lineStyle(.6, 0x00FF00)
 					
-					if (velocity.y > 0.0) {
+					if (velocity.y > .0) {
 						if (blockAABB.top < nextAABB.bottom && blockAABB.top > nextAABB.top) {
-							velocity.y = 0.0
+							velocity.y = .0
 							onGround = true
-							graphics.lineStyle(0.7, 0xFFFF00)
+							graphics.lineStyle(.7, 0xFFFF00)
 							graphics.drawRect(blockX * Block.SIZE.toDouble(), blockY * Block.SIZE.toDouble(), Block.SIZE.toDouble(), Block.SIZE.toDouble())
 						}
-					} else if (velocity.y < 0.0) {
+					} else if (velocity.y < .0) {
 						if (blockAABB.bottom > nextAABB.top && blockAABB.bottom < nextAABB.bottom) {
-							velocity.y = 0.0
+							velocity.y = .0
 						}
 					}
 					
-					if (abs(blockAABB.top - nextAABB.bottom) < 0.1) {
+					if (abs(blockAABB.top - nextAABB.bottom) < .1) {
 						continue
 					}
 					
-					if (velocity.x > 0.0) {
+					if (velocity.x > .0) {
 						if (blockAABB.left < nextAABB.right && blockAABB.left > nextAABB.left) {
-							velocity.x = 0.0
+							velocity.x = .0
 							inHorizontalCollision = true
 						}
-					} else if (velocity.x < 0.0) {
+					} else if (velocity.x < .0) {
 						if (blockAABB.right > nextAABB.left && blockAABB.right < nextAABB.right) {
-							velocity.x = 0.0
+							velocity.x = .0
 							inHorizontalCollision = true
 						}
 					}
@@ -149,11 +149,10 @@ abstract class Entity : Sprite() {
 	
 	fun move(direction: Direction, force: Double = velocityForce) {
 		if (onGround) velocity.x = direction.x * force * 4.5
-		else velocity.x += direction.x * force * 0.4
+		else velocity.x += direction.x * force * .4
 	}
 	
 	fun setPosition(blockPos: IPointData) = position.copyFrom(blockPos)
-	
 	fun setPosition(blockPos: BlockPos) = position.copyFrom((blockPos * Block.SIZE).toPoint())
 	
 	fun setTexture(name: String, width: Double? = null, height: Double? = null) {
@@ -165,13 +164,13 @@ abstract class Entity : Sprite() {
 	}
 	
 	open fun update(deltaTime: Double) {
-		if (hasGravity) velocity.y += gravity
+		if (hasGravity) velocity.y += gravity * deltaTime
 		
 		velocity.x.coerceIn(-maxVelocity..maxVelocity).also { velocity.x = it }
 		velocity.y.coerceIn(-maxVelocity..maxVelocity).also { velocity.y = it }
 		
-		if (abs(velocity.x) < EPSILON) velocity.x = 0.0
-		if (abs(velocity.y) < EPSILON) velocity.y = 0.0
+		if (abs(velocity.x) < EPSILON) velocity.x = .0
+		if (abs(velocity.y) < EPSILON) velocity.y = .0
 		
 		if (window["debugCollisions"] == true) {
 			if (Game.worldViewport.children.none { it == graphics }) Game.worldViewport.addChild(graphics)
@@ -181,7 +180,7 @@ abstract class Entity : Sprite() {
 				lineStyle(1.3, 0x0000FF)
 				val bounds = getAABB()
 				drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
-				lineStyle(0.4, 0x000000)
+				lineStyle(.4, 0x000000)
 				beginFill(0x00FF00)
 				drawCircle(this@Entity.position.x, this@Entity.position.y, 1.0)
 				endFill()
@@ -191,7 +190,7 @@ abstract class Entity : Sprite() {
 			renderable = true
 		}
 		
-		velocity.x *= if (onGround) 0.7 else 0.9
+		velocity.x *= if (onGround) .7 else .9 * deltaTime
 		handleCollisions(Game.level)
 		
 		position += velocity.clone() * deltaTime
