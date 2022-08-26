@@ -5,17 +5,14 @@ import blocks.Block
 import blocks.BlockState
 import entities.Entity
 import entities.Player
-import items.AirItem.block
 import kotlinx.js.console
 import level.Chunk
 import level.Level
-import level.prettyPrint
 import level.saving.SaveBlock
 import level.saving.patchLevel
 import math.ChunkPos
 import math.Vec2I
 import pixi.typings.math.Point
-import stringify
 import kotlin.math.pow
 
 fun getFormat(save: String) = save.substring(save.indexOf("f:") + 2, save.indexOf("sd:")).toIntOrNull() ?: -1
@@ -151,7 +148,7 @@ fun loadLevel(save: String): Level {
 			}
 			
 			blocksData.forEachIndexed { index1, (pos, data) ->
-				getChunkAt(pos)?.let { chunk ->
+				getChunk(pos)?.let { chunk ->
 					val blocks = IntArray(Chunk.SIZE.unsafeCast<Double>().pow(2).unsafeCast<Int>())
 					var blockIndex = 0
 					data.forEach { (id, count) ->

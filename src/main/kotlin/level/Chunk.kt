@@ -3,14 +3,12 @@ package level
 import Game
 import app
 import blocks.Block
-import blocks.BlockState
 import client.DebugGUI.getBounds
 import get
 import kotlinx.browser.window
 import kotlinx.js.jso
 import math.AABB
 import math.BlockPos
-import math.ChunkLocalBlockPos
 import math.ChunkPos
 import pixi.externals.extensions.Rectangle
 import pixi.externals.extensions.times
@@ -49,11 +47,6 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 	operator fun contains(pos: BlockPos) = pos.x in xBlock until xBlockMax && pos.y in yBlock until yBlockMax
 	fun contains(x: Int, y: Int) = x in xBlock until xBlockMax && y in yBlock until yBlockMax
 	
-	fun getBlockStateAt(x: Int, y: Int) = level.blockStates[blockTable[x, y]]
-	fun setBlockStateAt(x: Int, y: Int, blockState: Int) {
-		blockTable[x, y] = blockState
-	}
-	
 	fun destroy() {
 		tilemap.destroy(false)
 	}
@@ -63,6 +56,10 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		result * Block.SIZE
 		return result
 	}
+	
+	fun getBlockState(x: Int, y: Int) = level.blockStates[blockTable[x, y]]
+	
+	fun getBlockStates() = blockTable.map { level.blockStates[it] }
 	
 	fun getVisibleAABB(): AABB {
 		val position = Game.worldViewport.toScreen<Point>(tilemap.position)
@@ -74,11 +71,6 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		
 		return Rectangle(position, screenSize)
 	}
-	
-	fun getBlock(localBlockPos: ChunkLocalBlockPos) = getBlockStateAt(localBlockPos.x, localBlockPos.y)
-	fun getBlock(localX: Int, localY: Int) = getBlockStateAt(localX, localY)
-	
-	fun getBlockStates() = blockTable.map { level.blockStates[it] }
 	
 	fun isVisible() = app.screen.intersects(getVisibleAABB())
 	
@@ -109,12 +101,16 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		
 		for (x in 0 until SIZE) {
 			for (y in 0 until SIZE) {
-				tilemap.tile(Game.blockTextures[getBlock(x, y).block.name] ?: Game.emptyTexture, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
+				tilemap.tile(Game.blockTextures[getBlockState(x, y).block.name] ?: Game.emptyTexture, x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
 					tileHeight = Block.SIZE
 					tileWidth = Block.SIZE
 				})
 			}
 		}
+	}
+	
+	fun setBlockState(x: Int, y: Int, blockState: Int) {
+		blockTable[x, y] = blockState
 	}
 	
 	companion object {

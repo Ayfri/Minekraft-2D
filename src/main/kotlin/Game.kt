@@ -10,7 +10,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.js.jso
-import kotlinx.js.performance
 import level.Level
 import level.LevelBlock
 import level.LevelBlocks
@@ -216,7 +215,7 @@ object Game : EventEmitter() {
 		
 		keyMap.keyboardManager.onPress("p") {
 			window["debugChunks"] = !window["debugChunks"].toString().toBoolean()
-			level.renderVisible()
+			level.renderVisibleChunks()
 		}
 		
 		keyMap.onPress("save") {
@@ -225,7 +224,7 @@ object Game : EventEmitter() {
 		}
 		
 		worldViewport.on("zoomed") {
-			level.renderVisible()
+			level.renderVisibleChunks()
 		}
 		
 		keyMap.onPress("load") {
@@ -241,7 +240,7 @@ object Game : EventEmitter() {
 				worldViewport.moveCenter(position)
 			}
 			level.chunks.forEach { it.updateRender = true }
-			level.renderAll()
+			level.renderAllChunks()
 			app.ticker.start()
 		}
 		
@@ -285,8 +284,7 @@ object Game : EventEmitter() {
 		worldViewport.sortChildren()
 		
 		val blockPos = worldViewport.toWorld<IPointData>(mouseManager.position).toVec2I() / Block.SIZE
-		if (!level.inLevel(blockPos)) return
-		hoverBlock = LevelBlock(level.getBlockState(blockPos).block, blockPos)
+		hoverBlock = LevelBlock(level.getBlockStateOrNull(blockPos)?.block ?: return, blockPos)
 		
 		if (mouseManager.isPressed(0)) level.removeBlockState(blockPos)
 		

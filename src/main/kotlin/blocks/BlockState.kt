@@ -16,17 +16,17 @@ data class BlockState(var block: Block) {
 		val y = pos.y
 		
 		neighbors = listOf(
-			level.getBlockState(x - 1, y),
-			level.getBlockState(x + 1, y),
-			level.getBlockState(x, y - 1),
-			level.getBlockState(x, y + 1)
+			level.getBlockStateOrNull(x - 1, y),
+			level.getBlockStateOrNull(x + 1, y),
+			level.getBlockStateOrNull(x, y - 1),
+			level.getBlockStateOrNull(x, y + 1)
 		)
 	}
 	
 	fun hasSkyAccess(level: Level, pos: Vec2I): Boolean {
 		for (y in pos.y - 1 downTo 0) {
-			val block = level.getBlockState(pos.x, y)
-			if (block.block.blocksLight) return false
+			val blockState = level.getBlockState(pos.x, y)
+			if (blockState.block.blocksLight) return false
 		}
 		return true
 	}

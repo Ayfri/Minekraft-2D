@@ -37,21 +37,18 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		ticksTicker.maxFPS = 20
 	}
 	
-	fun getBlockStateAt(x: Int, y: Int) = getChunk(x, y)!!.let {
-		it.getBlockStateAt(x % it.xBlock, y % it.yBlock)
-	}
 	
-	fun setBlockStateAt(x: Int, y: Int, state: BlockState) {
+	fun setBlockStateUnsafe(x: Int, y: Int, state: BlockState) {
 		blockStates.add(state)
 		
-		getChunk(x, y)!!.let {
-			it.setBlockStateAt(x % it.xBlock, y % it.yBlock, state.indexIn(this))
+		getChunkFromBlockPos(x, y)!!.let {
+			it.setBlockState(x % it.xBlock, y % it.yBlock, state.indexIn(this))
 		}
 	}
 	
-	fun setBlockStateAsIndexAt(x: Int, y: Int, state: Int) {
-		getChunk(x, y)!!.let {
-			it.setBlockStateAt(x % it.xBlock, y % it.yBlock, state)
+	fun setBlockStateUnsafeAsIndex(x: Int, y: Int, state: Int) {
+		getChunkFromBlockPos(x, y)!!.let {
+			it.setBlockState(x % it.xBlock, y % it.yBlock, state)
 		}
 	}
 	
@@ -95,7 +92,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		updateRender = true
 		chunks.forEach { it.updateRender = true }
 		ticksTicker.start()
-		renderAll()
+		renderAllChunks()
 	}
 	
 	fun getAABBs(rectangle: Rectangle): List<AABB> {
@@ -108,61 +105,44 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		
 		for (x in x1..x2) {
 			for (y in y1..y2) {
-				if (inLevel(x, y)) {
-					aabbs += getBlockState(x, y).getAABB(Vec2I(x, y))
-				}
+				aabbs += getBlockStateOrNull(x, y)?.getAABB(Vec2I(x, y)) ?: continue
 			}
 		}
 		
 		return aabbs
 	}
 	
-	fun getBlocksStates(chunk: Chunk) : List<BlockState> {
-		val blocks = mutableListOf<BlockState>()
-		
-		for (x in chunk.xBlock until chunk.xBlockMax) {
-			for (y in chunk.yBlock until chunk.yBlockMax) {
-				blocks += getBlockState(x, y)
-			}
-		}
-		
-		return blocks
+	fun getBlockState(blockPos: BlockPos) = getBlockState(blockPos.x, blockPos.y)
+	
+	fun getBlockState(x: Int, y: Int) = getChunkFromBlockPos(x, y)!!.let {
+		it.getBlockState(x % it.xBlock, y % it.yBlock)
 	}
-	
-	fun getVisibleChunks() = chunks.filter(Chunk::isVisible)
-	fun getNotVisibleChunks() = chunks.filterNot(Chunk::isVisible)
-	
-	fun inLevel(blockPos: BlockPos) = blockPos.x in 0 until width && blockPos.y in 0 until height
-	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
-	
-	fun getChunk(blockX: Int, blockY: Int) = chunks.firstOrNull { it.contains(blockX, blockY) }
-	fun getChunk(blockPos: BlockPos) = chunks.firstOrNull { blockPos in it }
-	
-	fun getChunkAt(x: Int, y: Int) = chunks.firstOrNull { it.pos.x == x && it.pos.y == y }
-	fun getChunkAt(chunkPos: ChunkPos) = chunks.firstOrNull { it.pos == chunkPos }
-	
-	@Suppress("NOTHING_TO_INLINE")
-	inline fun getBlockState(blockPos: BlockPos) = getBlockStateAt(blockPos.x, blockPos.y)
-	
-	@Suppress("NOTHING_TO_INLINE")
-	inline fun getBlockState(x: Int, y: Int) = getBlockStateAt(x, y)
 	
 	fun getBlockStateOrNull(blockPos: BlockPos) = if (inLevel(blockPos)) getBlockState(blockPos) else null
 	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
 	
+	fun getChunk(x: Int, y: Int) = chunks.firstOrNull { it.pos.x == x && it.pos.y == y }
+	fun getChunk(chunkPos: ChunkPos) = chunks.firstOrNull { it.pos == chunkPos }
+	
+	fun getChunkFromBlockPos(blockX: Int, blockY: Int) = chunks.firstOrNull { it.contains(blockX, blockY) }
+	fun getChunkFromBlockPos(blockPos: BlockPos) = chunks.firstOrNull { blockPos in it }
+	
+	fun getNotVisibleChunks() = chunks.asSequence().filterNot(Chunk::isVisible)
+	
 	fun getTopPosition(x: Int): Int {
+		if (x !in 0 until width) throw IllegalArgumentException("x is out of bounds")
 		var y = 0
 		while (y < height && !getBlockState(x, y).block.visible) {
 			y++
 		}
+		
 		return y - 1
 	}
 	
-	fun setBlockStates(blocks: List<LevelBlock>) {
-		blocks.forEach { blockState ->
-			setBlockState(blockState.position, BlockState(blockState.block))
-		}
-	}
+	fun getVisibleChunks() = chunks.asSequence().filter(Chunk::isVisible)
+	
+	fun inLevel(blockPos: BlockPos) = blockPos.x in 0 until width && blockPos.y in 0 until height
+	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
 	
 	fun placeBlockState(blockPos: BlockPos, blockState: BlockState) = placeBlockState(blockPos.x, blockPos.y, blockState)
 	
@@ -206,23 +186,19 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	fun removeBlockState(blockPos: BlockPos) = setBlockState(blockPos, BlockState.AIR)
 	fun removeBlockState(x: Int, y: Int) = setBlockState(x, y, BlockState.AIR)
 	
-	fun renderAll() {
-		chunks.forEach(Chunk::render)
-	}
+	fun renderAllChunks() = chunks.forEach(Chunk::render)
 	
-	fun renderVisible() {
-		chunks.filter(Chunk::isVisible).forEach(Chunk::render)
-	}
+	fun renderChunkAt(chunkPos: ChunkPos) = getChunk(chunkPos)?.render()
+	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunkFromBlockPos(blockX, blockY)?.render()
+	fun renderChunkAtBlock(blockPos: BlockPos) = getChunkFromBlockPos(blockPos)?.render()
 	
-	fun renderChunkAt(chunkPos: ChunkPos) = getChunkAt(chunkPos)?.render()
-	fun renderChunkAtBlock(blockX: Int, blockY: Int) = getChunk(blockX, blockY)?.render()
-	fun renderChunkAtBlock(blockPos: BlockPos) = getChunk(blockPos)?.render()
+	fun renderVisibleChunks() = getVisibleChunks().forEach(Chunk::render)
 	
 	fun setBlockState(blockPos: BlockPos, blockState: BlockState) = setBlockState(blockPos.x, blockPos.y, blockState)
 	
 	fun setBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) == blockState) return
-		setBlockStateAt(x, y, blockState)
+		setBlockStateUnsafe(x, y, blockState)
 		renderChunkAtBlock(x, y)
 	}
 	
@@ -238,7 +214,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	fun tickBlockState(x: Int, y: Int) {
-		val blockState = getBlockState(x, y)
+		val blockState = getBlockStateOrNull(x, y) ?: return
 		if (!blockState.block.tickable) return
 		blockState.block.emit("tick", arrayOf(blockState, Vec2I(x, y), this))
 	}
@@ -248,9 +224,3 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		const val WIDTH = Chunk.SIZE * 32
 	}
 }
-
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun <E> Set<E>.get(index: Int) = elementAt(index)
-
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun <E> MutableSet<E>.plus(element: E) = add(element)

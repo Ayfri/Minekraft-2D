@@ -26,7 +26,7 @@ fun Level.oldLoading(blocks: List<Couple<Int>>, values: List<SaveBlock>) {
 	
 	oldBlockTableArray.forEachIndexed { index, it ->
 		val blockPos = oldBlockTableArray.getPosOfIndex(index)
-		setBlockStateAsIndexAt(blockPos.x.unsafeCast<Int>(), blockPos.y.unsafeCast<Int>(), it)
+		setBlockStateUnsafeAsIndex(blockPos.x.unsafeCast<Int>(), blockPos.y.unsafeCast<Int>(), it)
 	}
 }
 

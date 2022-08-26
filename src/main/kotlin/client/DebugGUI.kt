@@ -84,7 +84,7 @@ object DebugGUI : Gui() {
 			screen = x:${app.screen.width} y:${app.screen.height}
 		""".trimIndent()
 		
-		val chunk = level.getChunk(Game.hoverBlock.position)
+		val chunk = level.getChunkFromBlockPos(Game.hoverBlock.position)
 		selectedBlockText.text = """
 			x = ${Game.hoverBlock.x} y = ${Game.hoverBlock.y}
 			block = ${Game.hoverBlock.block.name}

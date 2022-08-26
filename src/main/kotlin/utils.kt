@@ -62,3 +62,9 @@ fun generateBlankTexture(options: (GenerateBlankTextureOptions) -> Unit): Render
 		region = sprite.getBounds()
 	})
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <E> Set<E>.get(index: Int) = elementAt(index)
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <E> MutableSet<E>.plus(element: E) = add(element)
