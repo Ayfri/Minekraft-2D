@@ -74,7 +74,6 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 	
 	fun isVisible() = app.screen.intersects(getVisibleAABB())
 	
-	
 	fun tick() {
 		for (i in 0..blockUpdatesPerTick) {
 			val x = Random.nextInt(SIZE)

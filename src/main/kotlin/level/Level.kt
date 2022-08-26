@@ -3,6 +3,7 @@ package level
 import Game
 import blocks.Block
 import blocks.BlockState
+import blocks.emit
 import entities.Player
 import math.AABB
 import math.BlockPos
@@ -36,8 +37,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 		ticksTicker.add { tick() }
 		ticksTicker.maxFPS = 20
 	}
-	
-	
 	
 	fun destroy() {
 		ticksTicker.destroy()
@@ -100,19 +99,16 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	}
 	
 	fun getBlockState(blockPos: BlockPos) = getBlockState(blockPos.x, blockPos.y)
-	
-	fun getBlockState(x: Int, y: Int) = getChunkFromBlockPos(x, y)!!.let {
-		it.getBlockState(x % it.xBlock, y % it.yBlock)
-	}
+	fun getBlockState(x: Int, y: Int) = getChunkFromBlockPos(x, y)!!.getBlockState(x % Chunk.SIZE, y % Chunk.SIZE)
 	
 	fun getBlockStateOrNull(blockPos: BlockPos) = if (inLevel(blockPos)) getBlockState(blockPos) else null
 	fun getBlockStateOrNull(x: Int, y: Int) = if (inLevel(x, y)) getBlockState(x, y) else null
 	
-	fun getChunk(x: Int, y: Int) = chunks.firstOrNull { it.pos.x == x && it.pos.y == y }
 	fun getChunk(chunkPos: ChunkPos) = chunks.firstOrNull { it.pos == chunkPos }
+	fun getChunk(x: Int, y: Int) = chunks.firstOrNull { it.pos.x == x && it.pos.y == y }
 	
-	fun getChunkFromBlockPos(blockX: Int, blockY: Int) = chunks.firstOrNull { it.contains(blockX, blockY) }
-	fun getChunkFromBlockPos(blockPos: BlockPos) = chunks.firstOrNull { blockPos in it }
+	fun getChunkFromBlockPos(blockPos: BlockPos) = getChunkFromBlockPos(blockPos.x, blockPos.y)
+	fun getChunkFromBlockPos(blockX: Int, blockY: Int) = getChunk(blockX / Chunk.SIZE, blockY / Chunk.SIZE)
 	
 	fun getNotVisibleChunks() = chunks.asSequence().filterNot(Chunk::isVisible)
 	
@@ -132,7 +128,6 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	fun inLevel(x: Int, y: Int) = x in 0 until width && y in 0 until height
 	
 	fun placeBlockState(blockPos: BlockPos, blockState: BlockState) = placeBlockState(blockPos.x, blockPos.y, blockState)
-	
 	fun placeBlockState(x: Int, y: Int, blockState: BlockState) {
 		if (getBlockState(x, y) != BlockState.AIR) return
 		setBlockState(x, y, blockState)
@@ -191,10 +186,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	
 	fun setBlockStateUnsafe(x: Int, y: Int, state: BlockState) {
 		blockStates.add(state)
-		
-		getChunkFromBlockPos(x, y)!!.let {
-			it.setBlockState(x % it.xBlock, y % it.yBlock, state.indexIn(this))
-		}
+		getChunkFromBlockPos(x, y)!!.setBlockState(x % Chunk.SIZE, y % Chunk.SIZE, state.indexIn(this))
 	}
 	
 	fun setBlockStateUnsafeAsIndex(x: Int, y: Int, state: Int) {
@@ -217,7 +209,7 @@ class Level(val height: Int = HEIGHT, val width: Int = WIDTH) {
 	fun tickBlockState(x: Int, y: Int) {
 		val blockState = getBlockStateOrNull(x, y) ?: return
 		if (!blockState.block.tickable) return
-		blockState.block.emit("tick", arrayOf(blockState, Vec2I(x, y), this))
+		blockState.block.emit("tick", LevelEvents.Tick(this, blockState, BlockPos(x, y)))
 	}
 	
 	companion object {
