@@ -4,10 +4,7 @@ import Game
 import blocks.Block
 import kotlinx.browser.window
 import level.Level
-import math.BlockPos
-import math.Direction
-import math.EPSILON
-import math.Vec2I
+import math.*
 import pixi.externals.extensions.div
 import pixi.externals.extensions.move
 import pixi.externals.extensions.plus
@@ -27,13 +24,15 @@ import kotlin.math.roundToInt
 abstract class Entity : Sprite() {
 	open var canCollide = true
 	open var hasGravity = true
-	open var gravity = .385
+	open var gravity = .2
 	open val velocity = Point()
-	open var maxVelocity = 1.0
-    open var jumpForce = 4.0
-	open var velocityForce = .5
-	var inHorizontalCollision = false
+	open var maxVelocity = 4.5
+	open var jumpForce = 2.75
+	open var velocityForce = 1.0
 	
+	var inHorizontalCollision = false
+	var insideBlocks = false
+	var jumping = false
 	var onGround = false
 	
 	private val graphics = Graphics().apply {
@@ -90,33 +89,35 @@ abstract class Entity : Sprite() {
 				
 				val blockAABB = block.getAABB(Vec2I(blockX, blockY))
 				
+				
 				if (blockAABB.intersects(nextAABB)) {
 					graphics.lineStyle(.6, 0x00FF00)
 					
 					if (velocity.y > .0) {
-						if (blockAABB.top < nextAABB.bottom && blockAABB.top > nextAABB.top) {
+						if (blockAABB.overlapsBottomFromTopOf(nextAABB) && nextAABB.overlapsTopFromTopOf(blockAABB)) {
 							velocity.y = .0
 							onGround = true
+							jumping = false
 							graphics.lineStyle(.7, 0xFFFF00)
 							graphics.drawRect(blockX * Block.SIZE.toDouble(), blockY * Block.SIZE.toDouble(), Block.SIZE.toDouble(), Block.SIZE.toDouble())
 						}
 					} else if (velocity.y < .0) {
-						if (blockAABB.bottom > nextAABB.top && blockAABB.bottom < nextAABB.bottom) {
+						if (blockAABB.overlapsBottomFromTopOf(nextAABB) && nextAABB.overlapsBottomFromBottomOf(blockAABB)) {
 							velocity.y = .0
 						}
 					}
 					
-					if (abs(blockAABB.top - nextAABB.bottom) < .1) {
+					if (blockAABB.absDistanceTopFromBottomOf(nextAABB) < .1) {
 						continue
 					}
 					
 					if (velocity.x > .0) {
-						if (blockAABB.left < nextAABB.right && blockAABB.left > nextAABB.left) {
+						if (blockAABB.overlapsRightFromLeftOf(nextAABB) && nextAABB.overlapsLeftFromLeftOf(blockAABB)) {
 							velocity.x = .0
 							inHorizontalCollision = true
 						}
 					} else if (velocity.x < .0) {
-						if (blockAABB.right > nextAABB.left && blockAABB.right < nextAABB.right) {
+						if (blockAABB.overlapsRightFromLeftOf(nextAABB) && nextAABB.overlapsRightFromRightOf(blockAABB)) {
 							velocity.x = .0
 							inHorizontalCollision = true
 						}
@@ -140,10 +141,11 @@ abstract class Entity : Sprite() {
 	open fun getAABB() = getLocalBounds().clone().move(x, y)
 	
 	open fun jump(force: Double = jumpForce) {
-		if (onGround) {
+		if (!jumping && !insideBlocks) {
 			velocity.y = -force
 			position.y -= 1.0
 			onGround = false
+			jumping = true
 		}
 	}
 	
@@ -178,6 +180,7 @@ abstract class Entity : Sprite() {
 			graphics.clear()
 			graphics.apply {
 				lineStyle(1.3, 0x0000FF)
+				
 				val bounds = getAABB()
 				drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
 				lineStyle(.4, 0x000000)
@@ -190,7 +193,8 @@ abstract class Entity : Sprite() {
 			renderable = true
 		}
 		
-		velocity.x *= if (onGround) .7 else .9 * deltaTime
+		val xDecrease = (if (onGround) .33 else .1) * deltaTime
+		velocity.x *= 1 - xDecrease
 		handleCollisions(Game.level)
 		
 		position += velocity.clone() * deltaTime
