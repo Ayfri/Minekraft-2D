@@ -7,7 +7,7 @@ object Project {
 }
 
 plugins {
-    kotlin("js") version "1.7.10"
+    kotlin("js") version "1.7.20"
 }
 
 group = "fr.ayfri"
@@ -31,7 +31,7 @@ dependencies {
     implementation("org.jetbrains.kotlin-wrappers:kotlin-js:1.0.0-pre.365")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
     implementation(npm("@pixi/tilemap", "3.2.2"))
-    implementation(npm("pixi-viewport", "4.34.4"))
+    implementation(npm("pixi-viewport", "4.37.0"))
     implementation(npm("idb", "7.0.1"))
 }
 
@@ -41,7 +41,6 @@ kotlin {
         browser {
             commonWebpackConfig {
                 devServer?.open = false
-                cssSupport.enabled = true
                 mode = Mode.DEVELOPMENT
                 sourceMaps = true
                 showProgress = true
