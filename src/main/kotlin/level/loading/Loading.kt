@@ -4,7 +4,6 @@ import blocks.Block
 import blocks.BlockState
 import entities.Entity
 import entities.Player
-import kotlinx.js.console
 import level.Chunk
 import level.Level
 import level.saving.SaveBlock

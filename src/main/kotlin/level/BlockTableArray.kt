@@ -49,7 +49,6 @@ private const val stoneIcon = "."
 private const val woodIcon = "|"
 
 fun IntArray.prettyPrint() {
-	// width is the number of columns
 	val width = sqrt(size.toDouble())
 	
 	val result = StringBuilder()

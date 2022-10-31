@@ -3,7 +3,6 @@ package level
 import Game
 import app
 import blocks.Block
-import client.DebugGUI.getBounds
 import kotlinx.browser.window
 import kotlinx.js.jso
 import math.AABB
@@ -18,9 +17,13 @@ import utils.get
 import kotlin.random.Random
 
 class Chunk(val level: Level, val pos: ChunkPos) {
-	lateinit var tilemapSize: Point
-	val blockTable = BlockTableArray(SIZE)
+	private val graphics = Graphics().apply {
+		zIndex = 15000
+	}
 	
+	lateinit var tilemapSize: Point
+	
+	val blockTable = BlockTableArray(SIZE)
 	val blockUpdatesPerTick = 3
 	val tilemap = CompositeTilemap().also {
 		it.zIndex = 10
@@ -28,11 +31,8 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		it.cullable = true
 		Game.worldViewport.addChild(it)
 	}
-	var updateRender = false
 	
-	private val graphics = Graphics().apply {
-		zIndex = 15000
-	}
+	var updateRender = false
 	
 	val x get() = pos.x
 	val y get() = pos.y
@@ -56,6 +56,8 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 		result * Block.SIZE
 		return result
 	}
+	
+	fun getBounds() = Rectangle(xBlock, yBlock, SIZE, SIZE)
 	
 	fun getBlockState(x: Int, y: Int) = level.blockStates[blockTable[x, y]]
 	
@@ -96,12 +98,14 @@ class Chunk(val level: Level, val pos: ChunkPos) {
 	fun toSave() = getBlockStates().map { Game.blockTextures.keys.indexOf(it.block.name) }
 	
 	fun render() {
-		if (!updateRender) return
 		tilemap.clear()
 		
 		for (x in 0 until SIZE) {
 			for (y in 0 until SIZE) {
-				tilemap.tile(getBlockState(x, y).block.getTexture(), x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
+				val block = getBlockState(x, y).block
+				if (!block.visible) continue
+				
+				tilemap.tile(block.getTexture(), x * Block.SIZE.toDouble(), y * Block.SIZE.toDouble(), jso {
 					tileHeight = Block.SIZE
 					tileWidth = Block.SIZE
 				})

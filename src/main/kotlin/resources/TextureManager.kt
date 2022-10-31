@@ -9,7 +9,7 @@ import pixi.typings.utils.EventEmitter
 import utils.getOwnPropertyNames
 
 object TextureManager : EventEmitter() {
-	private val textures = mutableMapOf<String, Texture<*>>()
+	private val textures = mutableMapOf<String, Texture<out Resource>>()
 	private val loader = Loader()
 	private val preLoadTextures = mutableMapOf<String, String>()
 	
