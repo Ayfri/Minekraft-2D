@@ -26,7 +26,7 @@ abstract class Entity : Sprite() {
 	open var hasGravity = true
 	open var gravity = .2
 	open val velocity = Point()
-	open var maxVelocity = 4.5
+	open var maxVelocity = 6
 	open var jumpForce = 2.75
 	open var velocityForce = 1.0
 	
@@ -151,7 +151,7 @@ abstract class Entity : Sprite() {
 	
 	fun move(direction: Direction, force: Double = velocityForce) {
 		if (onGround) velocity.x = direction.x * force * 4.5
-		else velocity.x += direction.x * force * .4
+		else velocity.x += direction.x * force * .2
 	}
 	
 	fun setPosition(blockPos: IPointData) = position.copyFrom(blockPos)
@@ -193,7 +193,7 @@ abstract class Entity : Sprite() {
 			renderable = true
 		}
 		
-		val xDecrease = (if (onGround) .33 else .1) * deltaTime
+		val xDecrease = (if (onGround) .66 else .1) * deltaTime
 		velocity.x *= 1 - xDecrease
 		handleCollisions(Game.level)
 		
